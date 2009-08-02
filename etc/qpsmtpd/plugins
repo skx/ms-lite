@@ -61,6 +61,28 @@ global/unrecognized_commands
 
 ##
 #
+# Greylisting for this domain.
+#
+# This plugin is enabled if the following file is present:
+#
+#   /srv/example.com/checks/greylisting
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
+# Note: Greylisting is less effective than it used to be and I don't recommend
+# its use.  Still if you like it you can use it.
+#
+#
+###
+
+checks/greylisting
+
+
+
+
+
+##
+#
 # Test that the client identified itself properly.
 #
 # This plugin is enabled if either of the following files are present:
@@ -93,6 +115,7 @@ checks/helo
 ###
 
 checks/rdns
+
 
 
 
