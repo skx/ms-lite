@@ -1,7 +1,9 @@
 #!/usr/bin/perl
 #
-#  Alter the message before it is archived or delivered
-# to add headers
+#  Alter the message before it is archived or delivered to add headers to it.
+#
+#  We always add headers to identify where the mail came from, and in the
+# case of a rejected message we add the rejection reason too.
 #
 # Steve
 # --

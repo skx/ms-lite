@@ -7,7 +7,7 @@ Mail Handling
 -------------
 
   To recieve mail you'll need qpsmtpd, which will be configured to
- run the plugins located beneath plugins.
+ run the plugins located beneath ./plugins/
 
   Some of the plugins have additional dependencies they are listed
  here:
@@ -24,7 +24,7 @@ Quarantine Display
  /usr/lib/cgi-bin.
 
   Don't forget to ACL this script as it will allow others to view your
- mail instead.
+ mail instead...
 
 
 

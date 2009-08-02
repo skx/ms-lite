@@ -1,8 +1,21 @@
 #!/usr/bin/perl -w
 #
-#  Archive to /spam/$yday/$domain/{new cur tmp}
+#  Here we archive the mail as it wa rejected for being spam.
 #
-#  Write an index to /spam/$yday/$domain/index
+#  We write our archive of rejected messages beneath /spam/ with a subdirectory
+# for every day, and then for the domain itself.
+#
+#  For example a mail rejected on the 10th day of the year, which was originally
+# sent to bob@steve.org.uk will be written to:
+#
+#    /spam/10/steve.org.uk/{new cur tmp}
+#
+#  To speedup the display of quarantined mail a simple index of each rejected
+# mail is also written to:
+#
+#    /spam/10/steve.org.uk/index
+#
+#  (In the real mail-scanning.com service this data was stored in MySQL.)
 #
 # Steve
 # --
@@ -25,6 +38,16 @@ use warnings;
 my $_counter = 0;
 
 
+
+
+=begin doc
+
+  Process our arguments - we expect a single directory to be passed to
+ us which is the prefix for our archiving purpose.
+
+=end doc
+
+=cut
 
 sub register
 {
@@ -155,12 +178,15 @@ sub hook_queue
 
 
         #
-        #  Write to the index
+        #  Get data to be included in the index
         #
         my $from = $transaction->notes("MAIL-FROM")     || "<>";
         my $subj = $transaction->header->get("Subject") || "";
         chomp($subj);
 
+        #
+        #  Append to the index, using locking so we don't get fucked over.
+        #
         open( DAT, ">>", "$dir/index" );
         flock( DAT, LOCK_EX );
         print DAT "$from\|$to\|$dir/new/$file\|$subj\n";
@@ -168,6 +194,8 @@ sub hook_queue
 
         #
         #  Save the filename away as a reference.
+        #
+        #  TODO: Mail-scanning.com used this, do we?
         #
         $transaction->notes( "msgid", $file );
     }
