@@ -15,6 +15,16 @@
 
 
 
+##
+#
+# If there is any local configuration, for example SMTP-authentication
+# or relay control, then this can be included first.
+#
+###
+#
+$include plugins.local
+
+
 
 ##
 #
@@ -43,6 +53,9 @@ global/system_load load 3
 ###
 
 global/test_recipient
+
+
+
 
 
 ##
