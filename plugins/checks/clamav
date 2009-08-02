@@ -1,0 +1,191 @@
+#!/usr/bin/perl
+#
+# Block virus-infected mail.
+#
+
+
+
+use strict;
+use warnings;
+use Qpsmtpd::Constants;
+
+
+sub register
+{
+    my ( $self, $qp, @args ) = @_;
+    my %args;
+
+    if ( $args[0] && $args[0] =~ /^(\/[\/\-\_\.a-z0-9A-Z]*)$/ && -x $1 )
+    {
+        $self->{ _clamscan_loc } = $1;
+        shift @args;
+    }
+
+    for (@args)
+    {
+        if (/^max_size=(\d+)$/)
+        {
+            $self->{ _max_size } = $1;
+        }
+        elsif (/^clamscan_path=(\/[\/\-\_\.a-z0-9A-Z]*)$/)
+        {
+            $self->{ _clamscan_loc } = $1;
+        }
+        else
+        {
+            $self->log( LOGERROR,
+                        "Unrecognized argument '$_' to clamav plugin" );
+            return undef;
+        }
+    }
+
+    #
+    #  Setup defaults
+    #
+    $self->{ _max_size }     ||= 512 * 1024;
+    $self->{ _spool_dir }    ||= $self->spool_dir();
+    $self->{ _clamscan_loc } ||= "/usr/bin/clamdscan";
+
+
+    unless ( $self->{ _spool_dir } )
+    {
+        $self->log( LOGERROR, "No spool dir configuration found" );
+        return undef;
+    }
+    unless ( -d $self->{ _spool_dir } )
+    {
+        $self->log( LOGERROR, "Spool dir $self->{_spool_dir} does not exist" );
+        return undef;
+    }
+
+}
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = @_;
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If this checks isn't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/clamav" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    #  Get the size of the message.
+    #
+    if ( $transaction->body_size > $self->{ _max_size } )
+    {
+        $self->log( LOGWARN,
+                    'Mail too large for clamav scan (' .
+                      $transaction->body_size . " vs $self->{_max_size})"
+                  );
+        return (DECLINED);
+    }
+
+    #
+    #  Ensure we have the scanner installed
+    #
+    if ( ( !-e $self->{ _clamscan_loc } ) ||
+         ( !-x $self->{ _clamscan_loc } ) )
+    {
+        $self->log( LOGWARN, "Virus scanner not installed" );
+        return (DECLINED);
+    }
+
+
+    #
+    #  Get the body of the message
+    #
+    my $filename = $transaction->body_filename;
+    unless ( defined $filename )
+    {
+        $self->log( LOGWARN, "didn't get a filename" );
+        return DECLINED;
+    }
+    my $mode = ( stat( $self->{ _spool_dir } ) )[2];
+    if ( $mode & 07077 )
+    {
+
+        # must be sharing spool directory with external app
+        chmod $mode, $filename;
+    }
+
+
+    #
+    # Now do the actual scanning!
+    #
+    my $cmd =
+      $self->{ _clamscan_loc } . " --stdout " . $self->{ _back_compat } .
+      " --disable-summary $filename 2>&1";
+    $self->log( LOGDEBUG, "Running: $cmd" );
+
+    my $output = `$cmd`;
+    my $result = ( $? >> 8 );
+    my $signal = ( $? & 127 );
+
+    chomp($output);
+    $output =~ s/^.* (.*) FOUND$/$1 /mg;
+    $self->log( LOGINFO, "clamscan results: $output" );
+
+    if ($signal)
+    {
+        $self->log( LOGWARN, "clamscan exited with signal: $signal" );
+        next;
+    }
+    if ( $result == 1 )
+    {
+        $self->log( LOGWARN, "Virus(es) found: $output" );
+        $transaction->header->add( "X-MS.com-Virus", $output );
+
+        #
+        #  Mark the message as being rejected.
+        #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "virus:" . $output );
+        return DECLINED;
+    }
+    elsif ($result)
+    {
+        $self->log( LOGERROR, "ClamAV error: $cmd: $result" );
+    }
+    else
+    {
+        $self->log( LOGWARN, "Clean?" );
+    }
+
+    return (DECLINED);
+}
+
+1;
+

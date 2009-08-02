@@ -1,0 +1,118 @@
+#!/usr/bin/perl
+#
+# Block mail which should be DKIM signed, but which isn't.
+#
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If checks aren't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/rdns" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+
+    #
+    #  Some domains that signe their messages with DKIM.
+    #
+    my @dkim_domains = qw ! ebay paypal gmail googlemail !;
+
+    #
+    #  Get the sender address, setup in the
+    #
+    my $from = $transaction->notes("MAIL-FROM");
+    $from =~ s/^<|>$//g;
+    $from = lc($from);
+
+
+
+    foreach my $domain (@dkim_domains)
+    {
+
+        #
+        #  If the sender matches one of our domain-key using domains
+        # then we'll reject if there is no domainkey-signature present.
+        #
+        if ( $from =~ /\@\Q$domain\E\./i )
+        {
+
+            #
+            #  Get the signing header, if present.
+            #
+            my $dkim = $transaction->header->get('DomainKey-Signature') ||
+              $transaction->header->get('DKIM-Signature') ||
+              undef;
+
+            #
+            #  If we don't get a signature then we'll dump the mail.
+            #
+            if ( !defined($dkim) )
+            {
+                $self->log( LOGWARN, "dkim - no header from:$from" );
+
+                $transaction->notes( "reject", 1 );
+                $transaction->notes( "reason",
+                                  "Missing DKIM signature on mail from $from" );
+                return DECLINED;
+
+            }
+        }
+    }
+
+
+
+
+    #
+    #  Terminate.
+    #
+    $self->log( LOGWARN,
+          $self->plugin_name() . ": plugin passed: mail will not be rejected" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;

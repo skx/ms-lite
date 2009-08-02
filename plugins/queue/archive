@@ -1,0 +1,193 @@
+#!/usr/bin/perl -w
+#
+#  Archive to /spam/$yday/$domain/{new cur tmp}
+#
+#  Write an index to /spam/$yday/$domain/index
+#
+# Steve
+# --
+#
+
+
+
+use Qpsmtpd::Constants;
+
+use File::Path qw(mkpath);
+use Sys::Hostname qw(hostname);
+use Time::HiRes qw(gettimeofday);
+use Fcntl qw(:flock);
+
+use strict;
+use warnings;
+
+
+
+my $_counter = 0;
+
+
+
+sub register
+{
+    my ( $self, $qp, @args ) = @_;
+
+    if ( @args > 0 )
+    {
+        ( $self->{ _maildir } ) = ( $args[0] =~ m!([/\w\.]+)! );
+    }
+
+    unless ( $self->{ _maildir } )
+    {
+        $self->log( LOGWARN, "WARNING: maildir directory not specified" );
+        return 0;
+    }
+
+    my $hostname = ( hostname =~ m/([\w\._\-]+)/ )[0];
+    $self->{ _hostname } = $hostname;
+}
+
+
+
+
+=begin doc
+
+  If this mail is to be rejected then archive it to disk.
+
+=end doc
+
+=cut
+
+sub hook_queue
+{
+    my ( $self, $transaction ) = @_;
+
+    #
+    # If the mail is not rejected then return immediately.
+    #
+    if ( 0 == ( $transaction->notes("reject") || 0 ) )
+    {
+        return DECLINED;
+    }
+
+    #
+    #
+    # Get the domain the mail is sent to, and archive it.
+    #
+    foreach my $recipient ( $transaction->recipients )
+    {
+        $recipient =~ s/^<//g;
+        $recipient =~ s/>$//g;
+
+        my $to = $recipient;
+
+        if ( $recipient =~ /(.*)@(.*)/ )
+        {
+            $recipient = $2;
+        }
+        $recipient = lc($recipient);
+
+
+        #
+        #  The day of the year is the thing we care about for archiving
+        # purposes.
+        #
+        my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+          localtime(time);
+
+
+        #
+        #  Now the location where we'll archive the message
+        #
+        my $dir = $self->{ _maildir } . "/$yday/$recipient";
+
+
+        if ( !-d $dir )
+        {
+            $self->log( LOGWARN,
+                    "Creating rejected directory for domain $recipient: $dir" );
+            mkpath $dir, 0, 0775;
+        }
+
+        else
+        {
+            $self->log( LOGWARN, "Archiving spam for domain $recipient" );
+        }
+
+        # ensure the maildir directories exist.
+        map {my $d = $dir . "/$_"; -e $d or mkpath $d, 0, 0775} qw(cur tmp new);
+
+        my ( $time, $microseconds ) = gettimeofday;
+
+        $time = ( $time =~ m/(\d+)/ )[0];
+        $microseconds =~ s/\D//g;
+
+        my $unique = "P$$" . "M$microseconds" . "Q" . $_counter++;
+        my $file = join ".", $time, $unique, $self->{ _hostname };
+
+        # tack on the recipient.
+        $file .= ".$recipient";
+
+
+        open( MF, ">$dir/tmp/$file" ) or
+          $self->log( LOGWARN, "could not open $dir/tmp/$file: $!" ),
+          return ( DECLINED, "queue error (open)" );
+
+        # save the recipient as the real address.
+        print MF "Recipient: $to\n";
+        $transaction->header->print( \*MF );
+        $transaction->body_resetpos;
+        while ( my $line = $transaction->body_getline )
+        {
+            print MF $line;
+        }
+
+        close MF or
+          $self->log( LOGWARN, "could not close $dir/tmp/$file: $!" ) and
+          return ( DECLINED, "queue error (close)" );
+
+        link "$dir/tmp/$file", "$dir/new/$file"
+          or
+          $self->log( LOGWARN,
+                      "could not link $dir/tmp/$file to $dir/new/$file: $!" )
+          and
+          return ( DECLINED, "queue error (link)" );
+
+        unlink "$dir/tmp/$file";
+
+
+        #
+        #  Write to the index
+        #
+        my $from = $transaction->notes("MAIL-FROM")     || "<>";
+        my $subj = $transaction->header->get("Subject") || "";
+        chomp($subj);
+
+        open( DAT, ">>", "$dir/index" );
+        flock( DAT, LOCK_EX );
+        print DAT "$from\|$to\|$dir/new/$file\|$subj\n";
+        close(DAT);
+
+        #
+        #  Save the filename away as a reference.
+        #
+        $transaction->notes( "msgid", $file );
+    }
+
+
+    my $msg_id = $transaction->header->get('Message-Id') || '';
+    my $filey  = $transaction->notes("msgid")            || '';
+
+    $msg_id =~ s/[\r\n].*//s;
+    return ( DECLINED, "archive_spam - $msg_id [$filey]" );
+
+    #
+    #  Proceed to queue/deliver where the bounce will be signalled.
+    #
+    return DECLINED;
+}
+
+
+
+#
+#  End of module
+#
+1;

@@ -1,0 +1,142 @@
+#
+#  This is /etc/qpsmtpd/plugins
+#
+#  It specifies the plugins which should be loaded by qpsmtpd.
+#
+#  The plugins listed here are all located beneath the directory:
+#
+#      /usr/share/qpsmtpd/plugins.local/
+#
+#
+# Steve
+# --
+#
+
+
+
+
+
+##
+#
+# If the local load is too high deny new connections.
+#
+###
+
+global/system_load load 3
+
+
+
+
+
+
+##
+#
+#  Test that the incoming mail was addressed to a valid recipient.
+#
+###
+
+global/test_recipient
+
+
+
+
+##
+#
+# Test that the client identified itself properly.
+#
+# This plugin is enabled if /srv/example.com/checks/helo exists
+#
+###
+
+checks/helo
+
+
+
+
+
+##
+#
+# Test the connecting client has reverse DNS setup.
+#
+# This plugin is enabled if /srv/example.com/checks/rdns exists
+#
+###
+
+checks/rdns
+
+
+
+
+##
+#
+# Test the mail has a Date: header.
+#
+# This plugin is enabled if /srv/example.com/checks/date exists.
+#
+###
+
+checks/date
+
+
+
+##
+#
+# Block known-bad mailers
+#
+# This plugin is enabled if /srv/example.com/checks/mailers exists
+#
+###
+
+checks/mailers
+
+
+
+
+##
+#
+# Look for mail which should be DKIM signed, but which isn't.
+#
+# This plugin is enabled if /srv/example.com/checks/dkim exists
+#
+##
+
+checks/dkim
+
+
+
+
+##
+#
+# Look for virus-infected mails.
+#
+##
+
+checks/clamav
+
+
+
+
+
+
+
+##
+#
+#  Whitelist + Blacklist handling
+#
+###
+
+global/black_list
+global/white_list
+
+
+
+
+
+##
+#
+#  Archive or deliver the mail.
+#
+##
+queue/alter
+queue/archive /spam/
+queue/deliver

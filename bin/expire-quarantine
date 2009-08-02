@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+#
+#  Expire the content beneath /spam/ to keep at least 30 days worth of history.
+#
+#
+# Steve
+# --
+#
+
+
+
+
+use strict;
+use warnings;
+
+use File::Basename qw! basename!;
+
+
+#
+# The directory our spam is stored beneath
+#
+my $prefix = "/spam";
+
+
+#
+# Ensure the directory exists
+#
+if ( !-d $prefix )
+{
+    print "SPAM archive / quarantine directory not found: $prefix\n";
+    exit 1;
+}
+
+
+
+#
+#  The entries we should keep.
+#
+my %keep = populateKeep();
+
+
+#
+#  Now for each directory we find which isn't to be kept remove.
+#
+foreach my $entry ( sort( glob( $prefix . "/*" ) ) )
+{
+    my $date = basename($entry);
+
+    if ( !$keep{ $date } )
+    {
+        system("rm -rf $entry");
+    }
+}
+
+
+
+
+=begin doc
+
+  Return a hash - the keys of which correspond to directories we should
+ keep which are found beneath /spam/.
+
+  This might require some explaination, but in short when we archive a mail
+ for "example.com" we write that to disk beneath:
+
+    /spam/312/example.com/
+
+  (Where 312 is the current day of the year.)
+
+  This means to work out what we want to keep we simply get the current day
+ of the year, and then keep the 30 previous days.  We are careful to wrap
+ backwards if we reach "0" to "day 365" of the previous year.
+
+=end doc
+
+=cut
+
+
+sub populateKeep
+{
+    my %keep;
+
+    #
+    #  Get the current day of the year "yday"
+    #
+    my ( undef, undef, undef, undef, undef, undef, undef, $yday, undef ) =
+      localtime(time);
+
+
+    #
+    # Count of days.
+    #
+    my $count = 0;
+
+    #
+    # We hedge the 30 day period to cope with both long months and
+    # leap years.
+    #
+    while ( $count <= 33 )
+    {
+
+        # keep the mail for this year day
+        $keep{ $yday } += 1;
+
+        # move on to the previous year-day and wrap correctly.
+        $yday -= 1;
+        if ( $yday < 0 )
+        {
+            $yday = 366;
+        }
+
+        # we've done a day
+        $count += 1;
+
+    }
+    return (%keep);
+}

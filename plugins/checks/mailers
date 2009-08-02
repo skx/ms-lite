@@ -1,0 +1,82 @@
+#!/usr/bin/perl
+#
+# Block mail sent by spam mailers.
+#
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If checks aren't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/mailers" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    #  Get the mailer.
+    #
+    my $agent = $transaction->header->get('X-Mailer') || undef;
+    if ( defined($agent) )
+    {
+        if ( ( $agent =~ /the bat/i ) ||
+             ( $agent =~ /^globomail$/i ) )
+        {
+            $transaction->notes( "reject", 1 );
+            $transaction->notes( "reason", "Bad mailer: $agent" );
+            return DECLINED;
+        }
+    }
+
+    #
+    #  Terminate.
+    #
+    $self->log( LOGWARN,
+         $self->plugin_name() . ": plugin passed - mail will not be rejected" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;

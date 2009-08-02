@@ -1,0 +1,53 @@
+#!/usr/bin/perl -w
+#
+#  Blacklist plugin
+#
+# Steve
+# --
+#
+
+
+
+use Qpsmtpd::Constants;
+
+
+
+
+=begin doc
+
+  Blacklist on a per-domain basis.
+
+=end doc
+
+=cut
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+    #
+    # Get the sending IP address.
+    #
+    my $remote_ip = $self->qp->connection->remote_ip;
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+    #
+    #  Is the IP blacklisted?
+    #
+    if ( -e "/srv/$domain/blacklisted/ips/$remote_ip" )
+    {
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason",
+                             "IP address $remote_ip locally blacklisted" );
+
+        return DECLINED;
+    }
+
+    return DECLINED;
+}

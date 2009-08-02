@@ -1,0 +1,19 @@
+#
+# This is a copy of the qpsmtpd debconf settings for use at startup time.
+#
+# Although you shouldn't edit it you will soon learn that this file is
+# over-written when the QPSMTPD package is upgraded.
+#
+# This configuration should work fine for Etch, Lenny, and Sid.
+#
+# It essentially says "bind on all interfaces" and "be enabled".
+#
+# Steve
+# --
+#
+
+ENABLED="true"
+INTERFACES=""
+QUEUE_PLUGIN=""
+QUEUE_MAILDIR_DESTINATION="/var/spool/qpsmtpd/Maildir"
+QUEUE_PROXY_DESTINATION="localhost"

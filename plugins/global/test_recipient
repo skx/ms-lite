@@ -1,0 +1,155 @@
+#!/usr/bin/perl -w
+#
+#  See if the mail is addressed to a valid user.
+#
+#  Do this by examining /srv/$domain/users/{valid invalid}
+#
+#  An invalid user will have two notes set:
+#
+#    reject  -> 1
+#
+#    reason  -> "Mail for $localpart not accepted at $domain"
+#
+#
+# Steve
+# --
+#
+
+
+
+
+use Qpsmtpd::Constants;
+
+
+
+=begin doc
+
+  This hook is called at "MAIL FROM" time, we record the sender but
+ take no further action.
+
+=end doc
+
+=cut
+
+sub hook_mail
+{
+    my ( $self, $transaction, $sender, %param ) = @_;
+
+    #
+    #  Record the sender
+    #
+    $transaction->notes( "MAIL-FROM", $sender );
+
+
+    #
+    #  But perform no other action.
+    #
+    return (DECLINED);
+}
+
+
+
+
+=begin doc
+
+  This hook is called at "RCPT TO" time, and will attempt to ensure
+ the recipient is valid.
+
+  Regardless of whether the recipient is valid we'll return OK to
+ allow the SMTP transaction to proceed.
+
+  For an invalid user we'll set the "reject" note to 1.
+
+=end doc
+
+=cut
+
+
+sub hook_rcpt
+{
+    my ( $self, $transaction, $recipient, %param ) = (@_);
+
+    #
+    # If a user is a relaying client then all is cool
+    #
+    return (OK) if $self->qp->connection->relay_client();
+
+    #
+    # make sure we got a host + user.
+    #
+    return (DECLINED) unless $recipient && $recipient->host && $recipient->user;
+
+    #
+    # Localpart + domain we're being told to deliver to.
+    #
+    my $host = lc $recipient->host;
+    my $user = lc $recipient->user;
+
+    #
+    #  Record the recipient + domain.
+    #
+    $transaction->notes( "RCPT-TO", "<$user\@$host>" );
+    $transaction->notes( "domain",  $host );
+
+
+    #
+    #  If the domain doesn't have a directory beneath /srv/ then it
+    # is a relay attempt
+    #
+    if ( !-d "/srv/$host" )
+    {
+
+        #
+        #  Rejected
+        #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Relay attempt for \@$host rejected" );
+
+        return OK;
+    }
+
+
+    #
+    #  Is the mail rejected?
+    #
+    if ( -e "/srv/$host/users/invalid/$user" )
+    {
+
+        #
+        #  Explicitly refused.
+        #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Mail for $user not accepted at $host" );
+
+        return OK;
+    }
+
+    #
+    #  Is it OK ?
+    #
+    if ( ( -e "/srv/$host/users/valid/*" ) ||
+         ( -e "/srv/$host/users/valid/$user" ) )
+    {
+
+        #
+        #  Either wildcard or explicitly allowed
+        #
+        return OK;
+    }
+    else
+    {
+
+        #
+        #  Not permitted, but not denied either.  Allow by default
+        #
+        return OK;
+    }
+}
+
+
+
+#
+#  End of module
+#
+
+1;

@@ -1,0 +1,11 @@
+
+##
+#
+#  Logging
+#
+###
+
+logging/ffile:0 loglevel LOGCRIT /var/log/qpsmtpd/terse.log
+logging/terse
+logging/ffile:1 loglevel LOGINFO /var/log/qpsmtpd/qpsmtpd.log
+

@@ -1,0 +1,98 @@
+#!/usr/bin/perl -w
+
+=head1 NAME
+
+system_load - Is the system is too overloaded to accept new connections?
+
+=head1 DESCRIPTION
+
+The B<system_load> module determines whether the system load is
+above a specifiable level, if so it rejects incoming connections.
+
+=cut
+
+
+=head1 AUTHOR
+
+Steve Kemp
+--
+http://mail-scanning.com/
+
+
+=cut
+
+
+=begin doc
+
+  Hook the pre-connection phase of the transaction - if the load is
+ high we want to know as soon as possible.
+
+=end doc
+
+=cut
+
+use Sys::CpuLoad;
+use Qpsmtpd::Constants;
+use strict;
+use warnings;
+
+
+
+
+=begin doc
+
+  Process arguments.  We only accept "load"
+
+=end doc
+
+=cut
+
+sub register
+{
+    my ( $self, $qp, @args ) = @_;
+
+    #
+    # Store arguments and set a default
+    #
+    %{ $self->{ "_args" } } = @args;
+    $self->{ "_args" }->{ "load" } ||= 3;
+}
+
+
+
+
+=begin doc
+
+  Get called at connection time and drop the connection
+ if the load is too high.
+
+=end doc
+
+=cut
+
+sub hook_pre_connection
+{
+    my ( $self, $transaction, %args ) = (@_);
+
+    #
+    #  Return if the configuration variable isn't present.
+    #
+    my $max_load = $self->{ "_args" }->{ "load" };
+    return DECLINED if ( !defined($max_load) );
+
+    #
+    #  Get current load.
+    #
+    my @loads = Sys::CpuLoad::load();
+    my $load  = int( $loads[0] );
+
+    if ( $load >= $max_load )
+    {
+        $self->log( LOGINFO,
+                   "check_system_load $load > $max_load rejecting connection" );
+        return ( DENYSOFT_DISCONNECT,
+                 "System load too high ($load) please try again later" );
+    }
+
+    return DECLINED;
+}

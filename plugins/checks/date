@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+#
+# Block mail which does not contain a date header.
+#
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If rdns checks aren't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/date" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    #  Make sure we have a Date header.
+    #
+    my $date = $transaction->header->get('Date') || undef;
+
+    if ( !defined($date) || !length($date) )
+    {
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Missing header - Date:" );
+        return DECLINED;
+    }
+
+    #
+    #  Terminate.
+    #
+    $self->log( LOGWARN,
+         $self->plugin_name() . ": plugin passed - mail will not be rejected" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;

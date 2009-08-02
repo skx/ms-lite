@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+#
+#  Alter the message before it is archived or delivered
+# to add headers
+#
+# Steve
+# --
+
+
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+    #
+    # get the sender + ip + helo name for logging.
+    #
+    my $remote_ip   = $self->qp->connection->remote_ip;
+    my $remote_host = $self->qp->connection->remote_host;
+    my $helo        = $self->qp->connection->hello_host;
+
+    #
+    # Store hosts.
+    #
+    $transaction->header->add( 'X-HELO',        $helo );
+    $transaction->header->add( 'X-REMOTE-IP',   $remote_ip );
+    $transaction->header->add( 'X-REMOTE-HOST', $remote_host );
+
+    #
+    #  If rejected store the reasons.
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        my $reason = $transaction->notes("reason") || "Unknown reason";
+
+        $transaction->header->add( 'X-REJECT-REASON', $reason );
+    }
+
+
+    #
+    #  All done
+    #
+    return DECLINED;
+}

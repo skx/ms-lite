@@ -1,0 +1,151 @@
+#!/usr/bin/perl -w
+#
+#  deliver to exim4 via bsmtp
+#
+
+
+use strict;
+use warnings;
+
+
+use IO::File;
+use Sys::Hostname qw(hostname);
+use File::Temp qw(tempfile);
+use Qpsmtpd::Constants;
+
+
+
+=begin doc
+
+  Parse any arguments we might have received.
+
+=end doc
+
+=cut
+
+sub register
+{
+    my ( $self, $qp, %args ) = @_;
+
+    $self->{ _exim_path } = $args{ exim_path } || '/usr/sbin/rsmtp';
+    $self->{ _exim_path } = $1 if $self->{ _exim_path } =~ /(.*)/;
+    unless ( -x $self->{ _exim_path } )
+    {
+        $self->log( LOGERROR,
+                    "Could not find exim at $self->{_exim_path};" .
+                      " please set exim_path in config/plugins"
+                  );
+        return undef;
+    }
+}
+
+
+
+
+=begin doc
+
+  If this mail is to be rejected then do so, otherwise pass to exim4
+ via BSMTP.
+
+=end doc
+
+=cut
+
+sub hook_queue
+{
+    my ( $self, $transaction ) = @_;
+
+    #
+    #  Reject if it is rejected and not whitelisted.
+    #
+    if ( 1 == ( $transaction->notes("reject") || 0 ) )
+    {
+
+        # The rejection reason
+        my $reason = $transaction->notes("reason") || "uknown reason";
+
+        #
+        # reject - with a bounce
+        #
+        return ( DENY, $reason );
+    }
+
+
+
+    my $tmp_dir = $self->qp->config('spool_dir') || '/tmp';
+    $tmp_dir = $1 if ( $tmp_dir =~ /(.*)/ );
+    my ( $tmp, $tmpfn ) = tempfile( "exim-bsmtp.$$.XXXXXXXX", DIR => $tmp_dir );
+    unless ( $tmp && $tmpfn )
+    {
+        $self->log( LOGERROR, "Couldn't create tempfile: $!" );
+        return ( DECLINED,
+                 "Internal error enqueueing  couldnt create tempfile $!" );
+    }
+
+    print $tmp "HELO ", hostname(), "\n",
+      "MAIL FROM:<", ( $transaction->sender->address || '' ), ">\n";
+
+    print $tmp "RCPT TO:<", ( $_->address || '' ), ">\n"
+      for $transaction->recipients;
+
+    print $tmp "DATA\n", $transaction->header->as_string;
+
+    $transaction->body_resetpos;
+
+    while ( my $line = $transaction->body_getline )
+    {
+        $line =~ s/^\./../;
+        print $tmp $line;
+    }
+    print $tmp ".\nQUIT\n";
+    close $tmp;
+
+    my $cmd = "$self->{_exim_path} -bS < $tmpfn";
+    $self->log( LOGDEBUG, "executing cmd $cmd" );
+    my $exim = new IO::File "$cmd|";
+    unless ($exim)
+    {
+        $self->log( LOGERROR, "Could not execute $self->{_exim_path}: $!" );
+        unlink $tmpfn or $self->log( LOGERROR, "unlink: $tmpfn: $!" );
+        return ( DECLINED,
+            "Internal error enqueuing mail couldnt execute $self->{_exim_path}: $!"
+        );
+    }
+
+    # Normally exim produces no output in BSMTP mode; anything that
+    # does come out is an error worth logging.
+    my $start = time;
+    while (<$exim>)
+    {
+        chomp;
+        $self->log( LOGERROR, "exim: $_" );
+    }
+    $self->log( LOGDEBUG, "BSMTP finished (" . ( time - $start ) . " sec)" );
+    $exim->close;
+    my $exit = $?;
+    unlink $tmpfn or $self->log( LOGERROR, "unlink: $tmpfn: $!" );
+
+    $self->log( LOGDEBUG, "Exitcode from exim: $exit" );
+    if ( ( $exit >> 8 ) != 0 )
+    {
+        $self->log( LOGERROR,
+                    'BSMTP enqueue failed; exitcode ' . ( $exit >> 8 ) .
+                      " from $self->{_exim_path} -bS"
+                  );
+        return ( DECLINED, 'Internal error enqueuing mail: bogus exitcode' );
+    }
+
+    $self->log( LOGINFO, "Enqueued to exim via BSMTP" );
+    return ( OK, "Queued!" );
+}
+
+
+
+
+#
+#  End of module
+#
+1;
+
+
+

@@ -1,0 +1,90 @@
+#!/usr/bin/perl
+#
+# Block HELO from clients which are IPs, or contain invalid characters.
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If helo checks aren't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/helo" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    # Get the HELO name the client sent.
+    #
+    my $helo = $self->qp->connection->hello_host;
+
+    if ( $helo =~ /_/ )
+    {
+        $self->log( LOGWARN, "Invalid charcter _ found in HELO $helo" );
+
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Invalid character in HELO: _" );
+        return DECLINED;
+    }
+
+    if ( $helo !~ /\./ )
+    {
+        $self->log( LOGWARN, "Unqualified HELO: $helo" );
+
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "HELO should be qualified" );
+        return DECLINED;
+    }
+
+
+    #
+    #  Terminate.
+    #
+    $self->log( LOGWARN,
+         $self->plugin_name() . ": plugin passed - mail will not be rejected" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;

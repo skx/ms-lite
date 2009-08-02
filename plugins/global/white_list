@@ -1,0 +1,121 @@
+#!/usr/bin/perl -w
+#
+#  Whitelist plugin
+#
+# Steve
+# --
+#
+
+
+
+use Qpsmtpd::Constants;
+
+
+
+
+=begin doc
+
+  Whitelist on a per-domain basis.
+
+=end doc
+
+=cut
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+    #
+    #  If the mail is not to be rejected then we'll terminate
+    # without doing any work.
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 0 )
+    {
+        return DECLINED;
+    }
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # Get the sending IP address, and whitelist if present.
+    #
+    my $remote_ip = $self->qp->connection->remote_ip;
+
+    if ( -e "/srv/$domain/whitelisted/ips/$remote_ip" )
+    {
+
+        #
+        #  OK this was from a whitelisted IP, remove the note.
+        #
+        $transaction->notes( "reject", 0 );
+        $transaction->notes( "reason", 0 );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the sender address, stripping brackets if present
+    #
+    my $sender = $transaction->notes("MAIL-FROM");
+    $sender =~ s/^<//g;
+    $sender =~ s/>$//g;
+
+    #
+    #  Is the sender whitelisted?
+    #
+    if ( -e "/srv/$domain/whitelisted/senders/$sender" )
+    {
+
+        #
+        #  OK this was from a whitelisted sender, remove the note.
+        #
+        $transaction->notes( "reject", 0 );
+        $transaction->notes( "reason", 0 );
+        return DECLINED;
+    }
+
+
+    #
+    #  Are any of the recipients whitelisted?
+    #
+    foreach my $recipient ( $transaction->recipients )
+    {
+        $recipient =~ s/^<//g;
+        $recipient =~ s/>$//g;
+        $recipient = lc($recipient);
+
+        if ( $recipient =~ /^(.*)@(.*)$/ )
+        {
+            $recipient = $1;
+        }
+
+        if ( -e "/srv/$domain/whitelisted/recipients/$recipient" )
+        {
+
+            #
+            #  OK this was addressed to at least one whitelisted
+            # recipient - allow the mail.
+            #
+            $transaction->notes( "reject", 0 );
+            $transaction->notes( "reason", 0 );
+            return DECLINED;
+        }
+    }
+
+    return DECLINED;
+}
+
+
+#
+#  End of module
+#
+1;
