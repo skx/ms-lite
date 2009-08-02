@@ -89,8 +89,9 @@ sub hook_data_post
                 $self->log( LOGWARN, "dkim - no header from:$from" );
 
                 $transaction->notes( "reject", 1 );
+                $transaction->notes( "blocker", $self->plugin_name() );
                 $transaction->notes( "reason",
-                                  "Missing DKIM signature on mail from $from" );
+                                     "Missing DKIM signature on mail from $from" );
                 return DECLINED;
 
             }

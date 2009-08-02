@@ -57,6 +57,7 @@ sub hook_data_post
     if ( !defined($date) || !length($date) )
     {
         $transaction->notes( "reject", 1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
         $transaction->notes( "reason", "Missing header - Date:" );
         return DECLINED;
     }

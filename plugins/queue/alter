@@ -35,8 +35,10 @@ sub hook_data_post
     if ( ( $transaction->notes("reject") || 0 ) == 1 )
     {
         my $reason = $transaction->notes("reason") || "Unknown reason";
+        my $plugin = $transaction->notes("blocker") || "Unknown";
 
         $transaction->header->add( 'X-REJECT-REASON', $reason );
+        $transaction->header->add( 'X-REJECT-PLUGIN', $plugin );
     }
 
 

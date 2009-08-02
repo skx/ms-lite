@@ -59,6 +59,7 @@ sub hook_data_post
              ( $agent =~ /^globomail$/i ) )
         {
             $transaction->notes( "reject", 1 );
+            $transaction->notes( "blocker", $self->plugin_name() );
             $transaction->notes( "reason", "Bad mailer: $agent" );
             return DECLINED;
         }

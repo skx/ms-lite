@@ -63,6 +63,7 @@ sub hook_data_post
         $self->log( LOGWARN, "Invalid charcter _ found in HELO $helo" );
 
         $transaction->notes( "reject", 1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
         $transaction->notes( "reason", "Invalid character in HELO: _" );
         return DECLINED;
     }
@@ -77,6 +78,7 @@ sub hook_data_post
         $self->log( LOGWARN, "Unqualified HELO: $helo" );
 
         $transaction->notes( "reject", 1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
         $transaction->notes( "reason", "HELO should be qualified" );
         return DECLINED;
     }
@@ -91,6 +93,7 @@ sub hook_data_post
         $self->log( LOGWARN, "IP Address used for HELO: $helo" );
 
         $transaction->notes( "reject", 1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
         $transaction->notes( "reason", "HELO should not be an IP address" );
         return DECLINED;
     }
