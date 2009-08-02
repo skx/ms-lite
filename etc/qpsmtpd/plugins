@@ -20,6 +20,9 @@
 #
 # If the local load is too high deny new connections.
 #
+# This plugin works globally, and is not affected by per-domain configuration.
+#
+#
 ###
 
 global/system_load load 3
@@ -33,6 +36,10 @@ global/system_load load 3
 #
 #  Test that the incoming mail was addressed to a valid recipient.
 #
+#  This plugin must be called first, or second.  Without this plugin the
+# expected notes and values will not be available for futher use.
+#
+#
 ###
 
 global/test_recipient
@@ -44,7 +51,12 @@ global/test_recipient
 #
 # Test that the client identified itself properly.
 #
-# This plugin is enabled if /srv/example.com/checks/helo exists
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/helo
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
 #
 ###
 
@@ -58,7 +70,13 @@ checks/helo
 #
 # Test the connecting client has reverse DNS setup.
 #
-# This plugin is enabled if /srv/example.com/checks/rdns exists
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/rdns
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
 #
 ###
 
@@ -71,7 +89,13 @@ checks/rdns
 #
 # Test the mail has a Date: header.
 #
-# This plugin is enabled if /srv/example.com/checks/date exists.
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/date
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
 #
 ###
 
@@ -83,7 +107,13 @@ checks/date
 #
 # Block known-bad mailers
 #
-# This plugin is enabled if /srv/example.com/checks/mailers exists
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/mailers
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
 #
 ###
 
@@ -96,7 +126,13 @@ checks/mailers
 #
 # Look for mail which should be DKIM signed, but which isn't.
 #
-# This plugin is enabled if /srv/example.com/checks/dkim exists
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/dkim
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
 #
 ##
 
@@ -108,6 +144,13 @@ checks/dkim
 ##
 #
 # Look for virus-infected mails.
+#
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/clamav
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
 #
 ##
 
