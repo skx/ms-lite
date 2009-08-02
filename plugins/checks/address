@@ -73,30 +73,48 @@ sub hook_data_post
         }
 
         #
-        #  Does the address start with a pipe?
-        #
-        #
-        #  Split by ","
+        #  The header might have multiple addresses separated by ",".
         #
         foreach my $term ( split( /,/, $val ) )
         {
-
+            #
             # strip whitespace
+            #
             $term =~ s/^\s+|\s+$//g;
             $term = lc($term);
 
+            #
+            #  Convert from:
+            #   "Steve Kemp" <bob@steve.org.uk>"
+            #
+            #  to: steve@steve.org.uk
+            #
             if ( $term =~ /<([^>]+)>$/ )
             {
                 $term = $1;
             }
 
+            #
+            #  There are mutple things we can test on, but here we
+            # just test the initial character
+            #
             if ( $term =~ /^[-|_!]/ )
             {
                 $transaction->notes( "reject",  1 );
                 $transaction->notes( "blocker", $self->plugin_name() );
                 $transaction->notes( "reason",  "Bogus initial character $header header : $term" );
                 return DECLINED;
+            }
 
+            #
+            #  Test for multiple "@" signs
+            #
+            if ( $term =~ /@@/ )
+            {
+                $transaction->notes( "reject",  1 );
+                $transaction->notes( "blocker", $self->plugin_name() );
+                $transaction->notes( "reason",  "Header $header contains two at signs : $term" );
+                return DECLINED;
             }
         }
     }
