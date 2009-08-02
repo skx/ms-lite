@@ -1,6 +1,12 @@
 #!/usr/bin/perl -w
 #
-#  deliver to exim4 via bsmtp
+#  If a mail has been rejected then we return that result to the caller,
+# otherwise we forward to exim via the BSMTP interface.
+#
+#  The setup of Exim4 is beyond the scope of the ms-lite package.
+#
+# Steve
+# --
 #
 
 
@@ -65,7 +71,7 @@ sub hook_queue
         my $reason = $transaction->notes("reason") || "uknown reason";
 
         #
-        # reject - with a bounce
+        # reject at SMTP time generating a bounce.
         #
         return ( DENY, $reason );
     }
