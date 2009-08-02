@@ -1,0 +1,33 @@
+
+Installing
+----------
+
+  To run this code you need to install qpsmtpd and then configure it
+ to use the plugins.
+
+  In short you need to run:
+
+     apt-get install qpsmtpd
+     rm /etc/qpsmtpd/*
+     cp ./etc/qpsmtpd/* /etc/qpsmtpd/
+
+
+  Now you can copy the plugins into place:
+
+      mkdir /usr/share/qpsmtpd/plugins.local
+      cp -R plugins/* /usr/share/qpsmtpd/plugins.local/
+
+  This should now allow you to restart qpsmtpd and have everything work,
+ but to be sure you'll need to setup the spam archive, and add a domain
+ as per-the readme instructions:
+
+    mkdir /spam
+    chmod 777 /spam
+
+    mkdir -p /srv/steve.org.uk/
+    etc.
+
+
+Steve
+--
+
