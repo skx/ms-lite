@@ -116,6 +116,18 @@ sub hook_data_post
                 $transaction->notes( "reason",  "Header $header contains two at signs : $term" );
                 return DECLINED;
             }
+
+
+            #
+            #  Test for a missing "@" sign
+            #
+            if ( $term !~ /@/ )
+            {
+                $transaction->notes( "reject",  1 );
+                $transaction->notes( "blocker", $self->plugin_name() );
+                $transaction->notes( "reason",  "Header $header contained value without an '@': $term" );
+                return DECLINED;
+            }
         }
     }
 

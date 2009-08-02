@@ -20,7 +20,7 @@ Installing
 
   This should now allow you to restart qpsmtpd and have everything work,
  but to be sure you'll need to setup the spam archive, and add a domain
- as per-the readme instructions:
+ as per-the online instructions:
 
 
     mkdir /spam
