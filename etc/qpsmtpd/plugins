@@ -45,6 +45,18 @@ global/system_load load 3
 global/test_recipient
 
 
+##
+#
+# Disconnect clients that send too many unrecognised commands.
+#
+# Clients disconnected in this fashion will *not* have their mail archived
+# to the quarantine area.
+#
+##
+
+global/unrecognized_commands
+
+
 
 
 ##

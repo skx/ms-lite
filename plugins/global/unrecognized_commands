@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+
+=head1 ABOUT
+
+Count unrecognized commands and disconnect when we have too many.
+
+=head1 DESCRIPTION
+
+Disconnect the client if it sends too many unrecognized commands.
+Good for rejecting spam sent through open HTTP proxies.
+
+=head1 CONFIGURATION
+
+Takes one parameter, the number of allowed unrecognized commands
+before we disconnect the client.  Defaults to 3.
+
+=cut
+
+use Qpsmtpd::Constants;
+use strict;
+use warnings;
+
+
+sub register
+{
+    my ( $self, $qp, @args ) = @_;
+
+    if ( @args > 0 )
+    {
+        $self->{ _unrec_cmd_max } = $args[0];
+        $self->log( LOGWARN, "WARNING: Ignoring additional arguments." )
+          if ( @args > 1 );
+    }
+    else
+    {
+        $self->{ _unrec_cmd_max } = 3;
+    }
+
+    $qp->connection->notes( 'unrec_cmd_count', 0 );
+
+}
+
+
+
+sub hook_unrecognized_command
+{
+    my ( $self, $cmd ) = @_[0, 2];
+
+    $self->log( LOGINFO, "Unrecognized command '$cmd'" );
+
+    my $badcmdcount =
+      $self->qp->connection->notes( 'unrec_cmd_count',
+                                    (
+                                       $self->qp->connection->notes(
+                                                           'unrec_cmd_count') ||
+                                         0
+                                      ) + 1
+                                  );
+
+    if ( $badcmdcount >= $self->{ _unrec_cmd_max } )
+    {
+        $self->log( LOGINFO,
+                    "Closing connection. Too many unrecognized commands." );
+        return ( DENY_DISCONNECT,
+            "Closing connection. $badcmdcount unrecognized commands.  Perhaps you should read RFC 2821?"
+        );
+    }
+
+    return DONE;
+}
+
