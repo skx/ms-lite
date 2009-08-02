@@ -140,6 +140,21 @@ checks/date
 
 ##
 #
+# Check the mail body has sensible values in the To: abd From: fields.
+#
+# This plugin is enabled if either of the following files are present:
+#
+#   /srv/example.com/checks/address
+#   /srv/example.com/checks/all
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
+##
+
+checks/address
+
+
+#
 # Block known-bad mailers
 #
 # This plugin is enabled if either of the following files are present:
