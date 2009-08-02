@@ -58,9 +58,9 @@ sub hook_data_post
         if ( ( $agent =~ /the bat/i ) ||
              ( $agent =~ /^globomail$/i ) )
         {
-            $transaction->notes( "reject", 1 );
+            $transaction->notes( "reject",  1 );
             $transaction->notes( "blocker", $self->plugin_name() );
-            $transaction->notes( "reason", "Bad mailer: $agent" );
+            $transaction->notes( "reason",  "Bad mailer: $agent" );
             return DECLINED;
         }
     }

@@ -171,9 +171,9 @@ sub hook_data_post
         #
         #  Mark the message as being rejected.
         #
-        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
-        $transaction->notes( "reason", "virus:" . $output );
+        $transaction->notes( "reason",  "virus:" . $output );
         return DECLINED;
     }
     elsif ($result)

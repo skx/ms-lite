@@ -55,7 +55,7 @@ sub hook_data_post
     #
     # If this check isn't enabled then return immediately
     #
-    if ( ! ( -e "/srv/$domain/checks/greylisting" )  )
+    if ( !( -e "/srv/$domain/checks/greylisting" ) )
     {
         $self->log( LOGWARN,
                 $self->plugin_name() . ": plugin disabled for domain $domain" );
@@ -69,17 +69,17 @@ sub hook_data_post
     my $fail = 0;
 
 
-    my $from = $transaction->notes("MAIL-FROM" );
+    my $from = $transaction->notes("MAIL-FROM");
     foreach my $to ( $transaction->recipients() )
     {
         $to =~ s/^<|>$//g;
-        $to = lc($to );
+        $to = lc($to);
 
-        if ( ! -e "/var/tmp/$from-$to" )
+        if ( !-e "/var/tmp/$from-$to" )
         {
             open( X, ">", "/var/tmp/$from-$to" );
             print X "\n";
-            close( X);
+            close(X);
 
             $fail += 1;
         }
@@ -87,8 +87,9 @@ sub hook_data_post
 
     if ( $fail > 0 )
     {
-        $self->log( LOGWARN, "Greylisting will deny the connection first time" );
-        return( DENYSOFT, "Greylisting in effect - please try again later" );
+        $self->log( LOGWARN,
+                    "Greylisting will deny the connection first time" );
+        return ( DENYSOFT, "Greylisting in effect - please try again later" );
     }
 
 

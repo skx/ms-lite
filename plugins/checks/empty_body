@@ -55,9 +55,9 @@ sub hook_data_post
     #
     if ( $transaction->body_size == 0 )
     {
-        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
-        $transaction->notes( "reason", "Empty body" );
+        $transaction->notes( "reason",  "Empty body" );
         return DECLINED;
     }
 

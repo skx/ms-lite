@@ -57,7 +57,7 @@ sub hook_data_post
     {
         $self->log( LOGWARN, "No reverse DNS for IP:$ip [$host]" );
 
-        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
         $transaction->notes( "reason",
                              "Missing reverse DNS for IP:$ip [$host]" );
