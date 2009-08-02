@@ -53,6 +53,11 @@ sub hook_data_post
     #
     my $helo = $self->qp->connection->hello_host;
 
+
+
+    #
+    # Reject if it contains invalid characters
+    #
     if ( $helo =~ /_/ )
     {
         $self->log( LOGWARN, "Invalid charcter _ found in HELO $helo" );
@@ -62,12 +67,31 @@ sub hook_data_post
         return DECLINED;
     }
 
+
+
+    #
+    # Reject if unqualified.
+    #
     if ( $helo !~ /\./ )
     {
         $self->log( LOGWARN, "Unqualified HELO: $helo" );
 
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "HELO should be qualified" );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Reject if it is an IP address
+    #
+    if ( $helo =~ /^([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)$/ )
+    {
+        $self->log( LOGWARN, "IP Address used for HELO: $helo" );
+
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "HELO should not be an IP address" );
         return DECLINED;
     }
 
