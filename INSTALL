@@ -8,21 +8,24 @@ Installing
   In short you need to run:
 
      apt-get install qpsmtpd
-     rm /etc/qpsmtpd/*
+     mkdir /etc/qpsmtpd/old
+     mv /etc/qpsmtpd/* /etc/qpsmtpd/old
      cp ./etc/qpsmtpd/* /etc/qpsmtpd/
 
 
   Now you can copy the plugins into place:
 
-      mkdir /usr/share/qpsmtpd/plugins.local
-      cp -R plugins/* /usr/share/qpsmtpd/plugins.local/
+      mkdir /usr/share/qpsmtpd/ms-lite
+      cp -R plugins/* /usr/share/qpsmtpd/ms-lite/
 
   This should now allow you to restart qpsmtpd and have everything work,
  but to be sure you'll need to setup the spam archive, and add a domain
  as per-the readme instructions:
 
+
     mkdir /spam
-    chmod 777 /spam
+    chown qpsmtpd.www-data /spam
+    chmod 750 /spam
 
     mkdir -p /srv/steve.org.uk/
     etc.
