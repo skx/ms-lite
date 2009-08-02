@@ -37,7 +37,7 @@ sub hook_data_post
 
 
     #
-    # If checks aren't enabled then return immediately
+    # If this check isn't enabled then return immediately
     #
     if (
          !( ( -e "/srv/$domain/checks/rdns" ) ||
