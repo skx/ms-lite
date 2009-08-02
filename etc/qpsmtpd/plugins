@@ -215,6 +215,9 @@ checks/dkim
 #
 # This allows the plugin to be enabled or disabled on a per-domain basis.
 #
+# Note this plugin will silently disable itself is the clamdscan binary
+# is not installed.
+#
 ##
 
 checks/clamav
