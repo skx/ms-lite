@@ -1,0 +1,110 @@
+#!/usr/bin/perl
+#
+# Greylisting plugin.
+#
+####
+#
+# This plugin is "special" because it breaks our abstraction - in almost
+# all other cases mail is either:
+#
+#   1.  Accepted for delivery.
+#
+#   2.  Stored in the quarantine.
+#
+# This plugin breaks that expectation by returning "DENYSOFT" (ie. a
+# temporary error) this means that the message is neither accepted nor
+# archived.
+#
+# Still people seem to love greylisting.
+#
+#
+#
+# Notes
+#
+####
+#
+# This plugin only cares about the "sender" and "recipient" pairs.
+#
+# It doesn't take account of sender IP, this allows us to ignore large
+# mailers such as Google who will connect from multiple outgoing MX
+# hosts and almost certainly never resend a message from the same IP
+# more than once.
+#
+#
+# Steve
+# --
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("domain") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+    #
+    # If this check isn't enabled then return immediately
+    #
+    if ( ! ( -e "/srv/$domain/checks/greylisting" )  )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    #  We cheat here.
+    #
+    my $fail = 0;
+
+
+    my $from = $transaction->notes("MAIL-FROM" );
+    foreach my $to ( $transaction->recipients() )
+    {
+        $to =~ s/^<|>$//g;
+        $to = lc($to );
+
+        if ( ! -e "/var/tmp/$from-$to" )
+        {
+            open( X, ">", "/var/tmp/$from-$to" );
+            print X "\n";
+            close( X);
+
+            $fail += 1;
+        }
+    }
+
+    if ( $fail > 0 )
+    {
+        $self->log( LOGWARN, "Greylisting will deny the connection first time" );
+        return( DENYSOFT, "Greylisting in effect - please try again later" );
+    }
+
+
+    #
+    #  Terminate.
+    #
+    $self->log( LOGWARN,
+         $self->plugin_name() . ": plugin passed - mail will not be rejected" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;
