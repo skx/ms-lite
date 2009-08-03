@@ -105,7 +105,7 @@ sub hook_rcpt
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "Relay attempt for \@$host rejected" );
 
-        return OK;
+        return( DENY, "Relay attempt for $host" );
     }
 
 
