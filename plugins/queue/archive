@@ -93,7 +93,8 @@ sub hook_queue
 
     #
     #
-    # Get the domain the mail is sent to, and archive it.
+    # Get the domain the mail is sent to, and archive it,
+    # with one copy for each recipient.
     #
     foreach my $recipient ( $transaction->recipients )
     {
