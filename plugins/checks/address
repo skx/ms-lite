@@ -95,7 +95,7 @@ sub hook_data_post
             }
 
             #
-            #  There are mutple things we can test on, but here we
+            #  There are multiple things we can test on, but here we
             # just test the initial character
             #
             if ( $term =~ /^[-|_!]/ )
