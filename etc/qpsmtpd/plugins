@@ -71,6 +71,24 @@ global/unrecognized_commands
 
 
 
+##
+#
+#  DNS Blacklists.
+#
+# This plugin is enabled if the following file is present:
+#
+#   /srv/example.com/zones
+#
+# This allows the plugin to be enabled or disabled on a per-domain basis.
+#
+# The file is different from other files in that it is expected to contain
+# a list of zones to query against, rather than being an on/off flag.
+#
+##
+
+checks/dnsbl
+
+
 
 ##
 #
