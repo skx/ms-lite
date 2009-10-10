@@ -1,0 +1,43 @@
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+ <head>
+  <title>Quarantine for <!-- tmpl_var name='domain' --></title>
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript" src="/js/jquery.stripy.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            $(function(){
+//
+// Demo 1
+//
+$("#table").stripy(
+        {  background_even: '#fefefe',
+                      background_odd: '#fefefe',
+                      background_hover: 'silver',
+       } )
+
+            });
+        </script>
+ </head>
+ <body>
+ <h1>quarantine for <!-- tmpl_var name='domain' --></h1>
+ <blockquote>
+  <p><a href="/cgi-bin/quarantine.cgi">Return to domain list.</a></p>
+ </blockquote>
+
+<!-- tmpl_if name='entries' -->
+ <table id="table" cellpadding="0" cellspacing="0">
+ <tr><th>From</th><th>To</th><th>Subject</th></tr>
+ <!-- tmpl_loop name='entries' -->
+  <tr>
+   <td><!-- tmpl_var name='from' escape='html' --></td>
+   <td><!-- tmpl_var name='to' escape='html' --></td>
+   <td><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></td>
+ </tr>
+ <!-- /tmpl_loop -->
+ </table>
+<!-- tmpl_else -->
+ <p>No rejected mail.</p>
+<!-- /tmpl_if -->
+
+ </body>
+</html>

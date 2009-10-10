@@ -59,42 +59,13 @@ if ( $cgi->param("file") )
     showFile( $domain, $cgi->param("file") );
     exit;
 }
-else
-{
 
-    #
-    #  Show quarantine contents
-    #
-    print "Content-type: text/html\n\n";
-    print "<h2>$domain</h2>\n";
+#
+#  Show a daomin
+#
+showQuarantine( $domain );
+exit;
 
-    my @entries = readIndexes($domain);
-
-    if ( !@entries )
-    {
-        print "No mail\n";
-        exit;
-    }
-
-    print "<table border=1>\n";
-    print "<tr><td>From</td><td>TO</td><td>Subject</td></tr>\n";
-    foreach my $line (@entries)
-    {
-        my ( $from, $to, $file, $subject ) = split( /\|/, $line );
-
-        $from =~ s/</&lt;/g;
-        $from =~ s/>/&gt;/g;
-        $to   =~ s/^<|>$//g;
-        $to   =~ s/@(.*)$//g;
-        $file = basename($file);
-        print
-          "<tr><td>$from</td><td>$to</td><td><a href=\"?domain=$domain;file=$file\">$subject</a></td></tr>\n";
-    }
-    print "</table>\n";
-
-
-    exit;
-}
 
 
 
@@ -229,4 +200,59 @@ sub readIndexes
     }
 
     return @total;
+}
+
+
+=begin doc
+
+  Show the quarantine for a single domain.
+
+=end doc
+
+=cut
+
+sub showQuarantine
+{
+    my( $domain ) = ( @_ );
+
+    #
+    #  Show quarantine contents
+    #
+    print "Content-type: text/html\n\n";
+
+    #
+    #  Load the template
+    #
+    my $template = HTML::Template->new( filename => "quarantine.tmpl",
+                                        loop_context_vars => 1 );
+
+    my @entries = readIndexes($domain);
+    if ( !@entries )
+    {
+        print $template->output();
+        return;
+    }
+
+    my $entries;
+
+    foreach my $line (@entries)
+    {
+        my ( $from, $to, $file, $subject ) = split( /\|/, $line );
+
+        $to   =~ s/^<|>$//g;
+        $to   =~ s/@(.*)$//g;
+        $file = basename($file) if ( $file );;
+
+        push(@$entries , {
+                          from => $from,
+                          to => $to,
+                          file => $file,
+                          domain => $domain,
+                          subject => $subject,
+                          } );
+    }
+
+    $template->param( entries => $entries ) if ( $entries );
+    $template->param( domain => $domain );
+    print $template->output();
 }
