@@ -86,9 +86,19 @@ sub showFile
     my ( $domain, $file ) = (@_);
 
     #
-    #  The file should be located beneath /srv/$day/$domain/new/$file
+    #  If the filename has evil parameters then just abort.
     #
-    foreach my $entry ( glob( "/srv/*/$domain/new/$file" ) )
+    if ( $file =~ /(\\|\/|\.\.)/ )
+    {
+        print "Invalid filename\n";
+        exit;
+    }
+
+
+    #
+    #  The file should be located beneath /spam/$day/$domain/new/$file
+    #
+    foreach my $entry ( glob( "/spam/*/$domain/new/$file" ) )
     {
         if ( -e $entry )
         {
@@ -105,9 +115,21 @@ sub showFile
         }
     }
 
-    print "Content-type: text/plain\n\n";
-    print "File not found\n";
-    exit;
+    print <<EOF;
+Content-type: text/html
+
+<html>
+ <head>
+  <title>Message Not Found</title>
+ </head>
+ <body>
+  <h1>Message Not Found</h1>
+  <blockquote>
+  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
+  </blockquote>
+ </body>
+</html>
+EOF
 
 }
 
