@@ -308,9 +308,10 @@ sub showQuarantine
     #
     my $page ;
     my $pages = int ( $count / 1000 );
-    while( my $i < $pages )
+    my $i = 0;
+    while( $i < $pages )
     {
-        push( @$page, { start => 1000 * $i, page => $i } );
+        push( @$page, { start => 1000 *( $i + 1), page =>( $i + 1 ) } );
         $i += 1;
     }
 
