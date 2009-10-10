@@ -377,14 +377,11 @@ sub checkPassword
 
     chomp( $line );
 
-    if ( $passwd ne $line )
+    if ( !defined($passwd) ||  ( $passwd ne $line ) )
     {
-        print <<EOF;
-Content-type: text/html
-
-
-Password mismatch
-EOF
+        my $template = HTML::Template->new( filename => "login.tmpl" ,
+                                            global_vars => 1 );
+        print $template->output();
         exit;
     }
 }
