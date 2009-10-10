@@ -50,6 +50,15 @@ my $passwd = $cgi->param("passwd" ) || undef;
 
 
 #
+#  If we're ACLd then we'll avoid reading unless there is a password.
+#
+if ( -e "/spam/passwd" )
+{
+    checkPassword();
+}
+
+
+#
 #  If we've not been given a domain then show the domain list.
 #
 my $domain = $cgi->param("domain") || undef;
@@ -356,4 +365,26 @@ sub showQuarantine
     $template->param( count   => $count ) if ( $count > 0 );
     $template->param( page    => $page )    if ($page);
     print $template->output();
+}
+
+
+sub checkPassword
+{
+    open( PASSWD,"<", "/spam/passwd" )
+      or die "Failed to read password: $!";
+    my $line = <PASSWD>;
+    close( PASSWD );
+
+    chomp( $line );
+
+    if ( $passwd ne $line )
+    {
+        print <<EOF;
+Content-type: text/html
+
+
+Password mismatch
+EOF
+        exit;
+    }
 }
