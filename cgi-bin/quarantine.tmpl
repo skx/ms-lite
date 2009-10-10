@@ -43,6 +43,7 @@ $("#table").stripy(
 </p>
 <!-- /tmpl_if -->
 <!-- tmpl_if name='entries' -->
+<blockquote>
  <!-- tmpl_loop name='entries' -->
 <div class="entry">
   <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
@@ -52,7 +53,7 @@ $("#table").stripy(
 </div>
   <div class="spacer">&nbsp;</div>
  <!-- /tmpl_loop -->
-
+</blockquote>
 <!-- tmpl_else -->
  <p>No rejected mail.</p>
 <!-- /tmpl_if -->
