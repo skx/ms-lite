@@ -2,14 +2,14 @@
 #
 # This is a simple viewer for the quarantine which is accessed at
 #
-#    http://foo.dh/cgi-bin/quarantine.cgi
-#
+#    http://example.com/cgi-bin/quarantine.cgi
 #
 # When a mail is rejected for a domain it is stored to:
 #
 #  /spam/$year-day/$domain/{new cur tmp}
 #
-# An indexer will be written too:
+# An index of each rejected message for each domain will also be written
+# as a flat file:
 #
 #  /spam/$year-day/$domain/index
 #
@@ -19,6 +19,9 @@
 #  2.  To
 #  3.  Filename
 #  4.  Subject
+#
+# ("$year-day" is the day number of the current year.)
+#
 #
 # Steve
 # --
@@ -38,12 +41,13 @@ use HTML::Template;
 #
 # Get the domain we're to view.
 #
-my $cgi = new CGI;
+my $cgi    = new CGI;
 my $domain = $cgi->param("domain") || undef;
 
 
 #
-#  If we've not been given a domain then just show the list.
+#  If we've not been given a domain then just show the list of available
+# domains.
 #
 if ( !defined($domain) )
 {
@@ -52,7 +56,7 @@ if ( !defined($domain) )
 }
 
 #
-#  If we've been given a file show it.
+#  If we've been given a mail file to display then show it.
 #
 if ( $cgi->param("file") )
 {
@@ -61,7 +65,7 @@ if ( $cgi->param("file") )
 }
 
 #
-#  Show a daomin
+#  Otherwise show the quarantine for the given domain.
 #
 showQuarantine($domain);
 exit;
@@ -71,7 +75,7 @@ exit;
 
 =begin doc
 
-  Show a single message
+  Show a single email message.
 
 =end doc
 
@@ -118,6 +122,7 @@ sub showFile
     exit;
 
 }
+
 
 =begin doc
 
@@ -179,27 +184,50 @@ sub showDomainList
 
 
 
+=begin doc
+
+  Return the index of rejected messages for the given domain.
+
+  NOTE: We only bother with the previous five days.
+
+=end doc
+
+=cut
 sub readIndexes
 {
     my ($domain) = (@_);
 
     my @total;
 
-    foreach my $file ( sort( glob("/spam/*/$domain/index") ) )
+    #
+    #  Get the year day.
+    #
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+      localtime(time);
+
+    my $count = 5;
+
+    while( $count > 0 )
     {
-        my @entries;
-
-        open( FILE, "<", $file );
-        while ( my $line = <FILE> )
+        if ( -e "/spam/$yday/$domain/index")
         {
-            chomp($line);
-            push( @entries, $line );
+            my @entries;
+
+            open( FILE, "<", "/spam/$yday/$domain/index" );
+            while ( my $line = <FILE> )
+            {
+                chomp($line);
+                push( @entries, $line );
+            }
+            close(FILE);
+
+            push( @total, reverse(@entries) );
         }
-        close(FILE);
 
-        push( @total, reverse(@entries) );
+        $count -= 1;
+        $yday  -= 1;
+        if ( $yday < 0 ) { $yday = 365; }
     }
-
     return @total;
 }
 
@@ -227,18 +255,37 @@ sub showQuarantine
     my $template = HTML::Template->new( filename          => "quarantine.tmpl",
                                         loop_context_vars => 1 );
 
-    my @entries = readIndexes($domain);
-    if ( !@entries )
+    #
+    #  Find all the details of the rejected mails.
+    #
+    my @avail = readIndexes($domain);
+    my $count = scalar( @avail );
+
+    #
+    #  No messages?
+    #
+    if ( $count <= 0 )
     {
         print $template->output();
         return;
     }
 
-    my $entries;
-    my $count = 0;
+    #
+    #  The start & end to show.
+    #
+    my $start = $cgi->param("start") || 0;
+    my $end   = $start + 1000;
 
-    foreach my $line (@entries)
+    #
+    #  The values we'll display
+    #
+    my $entries;
+
+    my $cur = 0;
+    foreach my $line (@avail)
     {
+        next unless ( ( $cur >= $start ) &&  ( $cur <= $end ) );
+
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
         $to =~ s/^<|>$//g;
@@ -252,11 +299,24 @@ sub showQuarantine
                  domain  => $domain,
                  subject => $subject,
               } );
-        $count += 1;
+
+        $cur +=1;
+    }
+
+    #
+    #  Paging.
+    #
+    my $page ;
+    my $pages = int ( $count / 1000 );
+    while( my $i < $pages )
+    {
+        push( @$page, { start => 1000 * $i, page => $i } );
+        $i += 1;
     }
 
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count );
     $template->param( domain  => $domain );
+    $template->param( pages => $pages ) if ( $pages );
     print $template->output();
 }
