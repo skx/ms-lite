@@ -11,9 +11,24 @@ $("#table").stripy(
                       background_odd: '#fefefe',
                       background_hover: 'silver',
        } )
-
             });
          </script>
+<style type="text/css">
+.entry {
+        border: 1px solid grey;
+        padding-top: 1px;
+        padding-bottom:1px;
+}
+.entry .title {
+        font-size: 140%;
+}
+.entry .details {
+        margin-left: 20px;
+}
+.spacer {
+        padding: 2px;
+}
+</style>
  </head>
  <body>
  <h1>quarantine for <!-- tmpl_var name='domain' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></h1>
@@ -28,16 +43,16 @@ $("#table").stripy(
 </p>
 <!-- /tmpl_if -->
 <!-- tmpl_if name='entries' -->
- <table id="table" cellpadding="0" cellspacing="0">
- <tr><th>From</th><th>To</th><th>Subject</th></tr>
  <!-- tmpl_loop name='entries' -->
-  <tr>
-   <td><!-- tmpl_var name='from' escape='html' --></td>
-   <td><!-- tmpl_var name='to' escape='html' --></td>
-   <td><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></td>
- </tr>
+<div class="entry">
+  <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
+  <div class="details">
+   From <!-- tmpl_var name='from' escape='html' --> to &lt;<!-- tmpl_var name='to' escape='html' -->@<!-- tmpl_var name='domain' -->&gt;
+  </div>
+</div>
+  <div class="spacer">&nbsp;</div>
  <!-- /tmpl_loop -->
- </table>
+
 <!-- tmpl_else -->
  <p>No rejected mail.</p>
 <!-- /tmpl_if -->
