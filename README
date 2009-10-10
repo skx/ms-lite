@@ -13,8 +13,8 @@ About
 
     2.  A standard configuration mechanism.
 
-    3.  A simple local-quarantine of rejected messages, and a matching
-        cgi-script to allow this to be viewed.
+    3.  A local quarantine of rejected messages, and a matching
+        CGI script to allow this to be viewed remotely.
 
 
 
@@ -32,7 +32,8 @@ Assumptions
     2. That the configuration for domains is located beneath a common
        prefix.  ("/srv/")
 
-    3. That the archive will be located in a fixed location. ("/spam/")
+    3. That the rejected quarantine will be located in a fixed location.
+       ("/spam/")
 
 
 
@@ -76,7 +77,7 @@ Domain Users Configuration
 
   (ie. "/valid/*" is present.)
 
-  A domain that excepts mail for all users except "bob" and "fred" will
+  A domain that accepts email for all users except "bob" and "fred" will
  have:
 
     mkdir -p /srv/example.com/users/valid/
@@ -122,7 +123,7 @@ Per-Domain Configuration
  do.
 
   As this is mail-scanning-lite only some checks are present at the moment,
- more will be ported in the near future.
+ more may be ported in the future.
 
 
 
@@ -171,17 +172,16 @@ Domain Blacklist Configuration
 Spam Storage
 ------------
 
-  Each rejected message will be archived to disk beneath a common
+  Each rejected message will be archived to disk beneath the common
  prefix of /spam/
 
-  The hierarchy is designed above all to be easy to "empty" or expire,
- so that implies that there will be some overhead.
+  The hierarchy is designed to be easy to "empty" or expire, and that
+ implies that there will be some overhead.
 
   Spam rejected on the 212th day of the year, for the domain example.com
  will be located beneath:
 
       /spam/212/example.com/{ new cur tmp }
-
 
   There will be an index created of the sender, recipient, subject, and
  filename in this index is used for the quarantine display:
@@ -201,7 +201,6 @@ Quarantine Display
  access it - as accessing it succesfully will enable a remote user to
  read all your rejected mail.
 
-
   The quarantine facility is pretty basic.  You get three things:
 
   1.  A list of all domains on the box.
@@ -217,13 +216,8 @@ Quarantine Display
 
   * Auto-whitelist the mail's sender.
 
-
   The former could be fixed, the latter would require enabling the Apache
  user to write to /srv which would be a security risk.
-
-
-
-
 
 
 
