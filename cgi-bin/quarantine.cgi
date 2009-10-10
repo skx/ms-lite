@@ -282,10 +282,12 @@ sub showQuarantine
     my $entries;
 
     my $cur = 0;
+    my $pcount = 0;
     foreach my $line (@avail)
     {
+        $cur +=1;
         next unless ( ( $cur >= $start ) &&  ( $cur <= $end ) );
-
+        $pcount += 1;
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
         $to =~ s/^<|>$//g;
@@ -300,7 +302,6 @@ sub showQuarantine
                  subject => $subject,
               } );
 
-        $cur +=1;
     }
 
     #
@@ -309,18 +310,21 @@ sub showQuarantine
     my $page ;
     my $pages = int ( $count / 1000 );
     my $i = 0;
+
     while( $i <= $pages )
     {
         push( @$page,
-            { start => 1000 *( $i + 1),
-              page => ( $i + 1 )
+            { start => (1000 * $i),
+              page => ( $i + 1 ),
+              domain => $domain,
             } );
         $i += 1;
     }
 
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count );
+    $template->param( pcount   => $pcount );
     $template->param( domain  => $domain );
-    $template->param( pages => $pages ) if ( $pages );
+    $template->param( page   => $page ) if ( $page );
     print $template->output();
 }
