@@ -277,8 +277,8 @@ sub showQuarantine
     #
     #  Load the template
     #
-    my $template = HTML::Template->new( filename          => "quarantine.tmpl",
-                                        loop_context_vars => 1 );
+    my $template = HTML::Template->new( filename => "quarantine.tmpl" );
+    $template->param( domain  => $domain );
 
     #
     #  Find all the details of the rejected mails.
@@ -346,7 +346,6 @@ sub showQuarantine
 
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count ) if ( $count > 0 );
-    $template->param( domain  => $domain );
     $template->param( page    => $page )    if ($page);
     print $template->output();
 }
