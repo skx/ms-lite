@@ -90,9 +90,21 @@ sub showFile
     #
     if ( $file =~ /(\\|\/|\.\.)/ )
     {
-        print "Content-type: text/plain\n\n";
-        print "Invalid filename\n";
-        exit;
+        print <<EOF;
+Content-type: text/html
+
+<html>
+ <head>
+  <title>Invalid Message</title>
+ </head>
+ <body>
+  <h1>Invalid Message</h1>
+  <blockquote>
+  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
+  </blockquote>
+ </body>
+</html>
+EOF
     }
 
 
