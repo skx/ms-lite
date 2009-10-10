@@ -41,7 +41,7 @@ use HTML::Template;
 #
 # Get the domain we're to view.
 #
-my $cgi    = new CGI;
+my $cgi = new CGI;
 my $domain = $cgi->param("domain") || undef;
 
 
@@ -85,28 +85,17 @@ sub showFile
 {
     my ( $domain, $file ) = (@_);
 
-    my @entries = readIndexes($domain);
-
-    if ( !@entries )
+    #
+    #  The file should be located beneath /srv/$day/$domain/new/$file
+    #
+    foreach my $entry ( glob( "/srv/*/$domain/new/$file" ) )
     {
-        print "Content-type: text/plain\n\n";
-        print "No mail\n";
-        exit;
-    }
-
-    foreach my $line (@entries)
-    {
-        my ( $from, $to, $name, $subject ) = split( /\|/, $line );
-
-        my $path = $name;
-        $path = basename($path) if ($path);
-
-        if ( $path eq $file )
+        if ( -e $entry )
         {
             print "Content-type: text/plain\n\n";
 
-            open( SPAM, "<", "/$name" ) or
-              die "Failed to open\n";
+            open( SPAM, "<", "$entry" ) or
+              die "Failed to open $entry - $!\n";
             while ( my $line = <SPAM> )
             {
                 print $line;
@@ -114,7 +103,6 @@ sub showFile
             close(SPAM);
             exit;
         }
-
     }
 
     print "Content-type: text/plain\n\n";
@@ -193,6 +181,7 @@ sub showDomainList
 =end doc
 
 =cut
+
 sub readIndexes
 {
     my ($domain) = (@_);
@@ -207,9 +196,9 @@ sub readIndexes
 
     my $count = 5;
 
-    while( $count > 0 )
+    while ( $count > 0 )
     {
-        if ( -e "/spam/$yday/$domain/index")
+        if ( -e "/spam/$yday/$domain/index" )
         {
             my @entries;
 
@@ -226,7 +215,7 @@ sub readIndexes
 
         $count -= 1;
         $yday  -= 1;
-        if ( $yday < 0 ) { $yday = 365; }
+        if ( $yday < 0 ) {$yday = 365;}
     }
     return @total;
 }
@@ -259,7 +248,7 @@ sub showQuarantine
     #  Find all the details of the rejected mails.
     #
     my @avail = readIndexes($domain);
-    my $count = scalar( @avail );
+    my $count = scalar(@avail);
 
     #
     #  No messages?
@@ -274,19 +263,19 @@ sub showQuarantine
     #  The start & end to show.
     #
     my $start = $cgi->param("start") || 0;
-    my $end   = $start + 1000;
+    my $end = $start + 1000;
 
     #
     #  The values we'll display
     #
     my $entries;
 
-    my $cur = 0;
+    my $cur    = 0;
     my $pcount = 0;
     foreach my $line (@avail)
     {
-        $cur +=1;
-        next unless ( ( $cur >= $start ) &&  ( $cur <= $end ) );
+        $cur += 1;
+        next unless ( ( $cur >= $start ) && ( $cur <= $end ) );
         $pcount += 1;
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
@@ -307,24 +296,24 @@ sub showQuarantine
     #
     #  Paging.
     #
-    my $page ;
-    my $pages = int ( $count / 1000 );
-    my $i = 0;
+    my $page;
+    my $pages = int( $count / 1000 );
+    my $i     = 0;
 
-    while( $i <= $pages )
+    while ( $i <= $pages )
     {
         push( @$page,
-            { start => (1000 * $i),
-              page => ( $i + 1 ),
-              domain => $domain,
-            } );
+              {  start  => ( 1000 * $i ),
+                 page   => ( $i + 1 ),
+                 domain => $domain,
+              } );
         $i += 1;
     }
 
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count );
-    $template->param( pcount   => $pcount );
+    $template->param( pcount  => $pcount );
     $template->param( domain  => $domain );
-    $template->param( page   => $page ) if ( $page );
+    $template->param( page    => $page )    if ($page);
     print $template->output();
 }
