@@ -190,6 +190,7 @@ sub hook_queue
         #
         open( DAT, ">>", "$dir/index" );
         flock( DAT, LOCK_EX );
+        $subj =~ s/[\r\n]//g;
         print DAT "$from\|$to\|$dir/new/$file\|$subj\n";
         close(DAT);
 
