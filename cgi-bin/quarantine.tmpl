@@ -21,7 +21,7 @@ $("#table").stripy(
   <p><a href="/cgi-bin/quarantine.cgi">Return to domain list.</a></p>
  </blockquote>
 <!-- tmpl_if name='page' -->
-<p>
+<p>Pages:
 <!-- tmpl_loop name='page' -->
  <a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;start=<!-- tmpl_var name='start' -->"><!-- tmpl_var name='page' --></a>
 <!-- /tmpl_loop -->
