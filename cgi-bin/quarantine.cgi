@@ -42,13 +42,17 @@ use HTML::Template;
 # Get the domain we're to view.
 #
 my $cgi = new CGI;
+
+#
+# Get any supplied password.
+#
+my $passwd = $cgi->param("passwd" ) || undef;
+
+
+#
+#  If we've not been given a domain then show the domain list.
+#
 my $domain = $cgi->param("domain") || undef;
-
-
-#
-#  If we've not been given a domain then just show the list of available
-# domains.
-#
 if ( !defined($domain) )
 {
     showDomainList();
@@ -200,7 +204,9 @@ sub showDomainList
     #
     #  Load the template, set the values, and exit.
     #
-    my $template = HTML::Template->new( filename => "domains.tmpl" );
+    my $template = HTML::Template->new( filename => "domains.tmpl" ,
+                                        global_vars => 1 );
+    $template->param( passwd   => $passwd )  if ($passwd);
     $template->param( all_domains  => $all_domains )  if ($all_domains);
     $template->param( spam_domains => $spam_domains ) if ($spam_domains);
     print $template->output();
@@ -277,7 +283,8 @@ sub showQuarantine
     #
     #  Load the template
     #
-    my $template = HTML::Template->new( filename => "quarantine.tmpl" );
+    my $template = HTML::Template->new( filename => "quarantine.tmpl",
+                                      global_vars => 1);
     $template->param( domain  => $domain );
 
     #
@@ -344,6 +351,7 @@ sub showQuarantine
         $i += 1;
     }
 
+    $template->param( passwd => $passwd ) if ($passwd);
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count ) if ( $count > 0 );
     $template->param( page    => $page )    if ($page);

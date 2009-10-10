@@ -1,7 +1,7 @@
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
  <head>
-  <title>Quarantine for <!-- tmpl_var name='domain' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></title>
+  <title>Quarantine for <!-- tmpl_var name='domain' escape='html' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></title>
     <script type="text/javascript" src="/js/jquery.js"></script>
     <script type="text/javascript" charset="utf-8">
             $(function(){
@@ -40,24 +40,24 @@
 </style>
  </head>
  <body>
- <h1>quarantine for <!-- tmpl_var name='domain' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></h1>
+ <h1>quarantine for <!-- tmpl_var name='domain' escape='html' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></h1>
  <blockquote>
-  <p><a href="/cgi-bin/quarantine.cgi">Return to domain list.</a></p>
+  <p><a href="/cgi-bin/quarantine.cgi;passwd=<!-- tmpl_var name='passwd' escape='html' -->">Return to domain list.</a></p>
  </blockquote>
 <!-- tmpl_if name='page' -->
 <p>Pages:
 <!-- tmpl_loop name='page' -->
- <a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;start=<!-- tmpl_var name='start' -->"><!-- tmpl_var name='page' --></a>
+ <a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;start=<!-- tmpl_var name='start' -->"><!-- tmpl_var name='page' --></a>
 <!-- /tmpl_loop -->
 </p>
 <!-- /tmpl_if -->
 <!-- tmpl_if name='entries' -->
 <blockquote>
  <!-- tmpl_loop name='entries' -->
-<div class="entry" url="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->">
-  <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
+<div class="entry" url="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;file=<!-- tmpl_var name='file' -->">
+  <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
   <div class="details">
-   From <!-- tmpl_var name='from' escape='html' --> to &lt;<!-- tmpl_var name='to' escape='html' -->@<!-- tmpl_var name='domain' -->&gt;
+   From <!-- tmpl_var name='from' escape='html' --> to &lt;<!-- tmpl_var name='to' escape='html' -->@<!-- tmpl_var name='domain' escape='html' -->&gt;
   </div>
 </div>
   <div class="spacer">&nbsp;</div>

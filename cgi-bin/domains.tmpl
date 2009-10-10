@@ -11,7 +11,7 @@
  <blockquote>
  <ul>
 <!-- tmpl_loop name='spam_domains' -->
-<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->"><!-- tmpl_var name='domain' --></a></li>
+<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->"><!-- tmpl_var name='domain' escape='html' --></a></li>
 <!-- /tmpl_loop -->
  </ul>
  </blockquote>
@@ -23,7 +23,7 @@
  <blockquote>
  <ul>
 <!-- tmpl_loop name='all_domains' -->
-<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->"><!-- tmpl_var name='domain' --></a></li>
+<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->"><!-- tmpl_var name='domain' escape='html' --></a></li>
 <!-- /tmpl_loop -->
   </ul>
  </blockquote>
