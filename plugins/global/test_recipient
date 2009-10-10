@@ -140,8 +140,11 @@ sub hook_rcpt
     {
 
         #
-        #  Not permitted, but not denied either.  Allow by default
+        #  Not permitted so it is denied.
         #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Mail for $user not accepted at $host" );
+
         return OK;
     }
 }
