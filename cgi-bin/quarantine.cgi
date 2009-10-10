@@ -63,7 +63,7 @@ if ( $cgi->param("file") )
 #
 #  Show a daomin
 #
-showQuarantine( $domain );
+showQuarantine($domain);
 exit;
 
 
@@ -95,7 +95,7 @@ sub showFile
         my ( $from, $to, $name, $subject ) = split( /\|/, $line );
 
         my $path = $name;
-        $path = basename($path) if ( $path );
+        $path = basename($path) if ($path);
 
         if ( $path eq $file )
         {
@@ -141,16 +141,16 @@ sub showDomainList
     foreach my $dir ( sort( glob("/srv/*") ) )
     {
         my $domain = basename($dir);
-        $all{$domain}=1;
+        $all{ $domain } = 1;
     }
 
     #
     #  Find all domains which have received spam.
     #
-    foreach my $dir ( sort( glob( "/spam/*/*" ) ) )
+    foreach my $dir ( sort( glob("/spam/*/*") ) )
     {
-        my $domain = basename($dir );
-        $spam{$domain}=1;
+        my $domain = basename($dir);
+        $spam{ $domain } = 1;
     }
 
     #
@@ -161,19 +161,19 @@ sub showDomainList
 
     foreach my $d ( sort keys %all )
     {
-        push(@$all_domains,{ domain => $d} );
+        push( @$all_domains, { domain => $d } );
     }
-    foreach my $d ( sort keys %spam)
+    foreach my $d ( sort keys %spam )
     {
-        push(@$spam_domains,{ domain => $d} );
+        push( @$spam_domains, { domain => $d } );
     }
 
     #
     #  Load the template, set the values, and exit.
     #
     my $template = HTML::Template->new( filename => "domains.tmpl" );
-    $template->param( all_domains => $all_domains ) if ( $all_domains );
-    $template->param( spam_domains => $spam_domains ) if ( $spam_domains );
+    $template->param( all_domains  => $all_domains )  if ($all_domains);
+    $template->param( spam_domains => $spam_domains ) if ($spam_domains);
     print $template->output();
 }
 
@@ -214,7 +214,7 @@ sub readIndexes
 
 sub showQuarantine
 {
-    my( $domain ) = ( @_ );
+    my ($domain) = (@_);
 
     #
     #  Show quarantine contents
@@ -224,7 +224,7 @@ sub showQuarantine
     #
     #  Load the template
     #
-    my $template = HTML::Template->new( filename => "quarantine.tmpl",
+    my $template = HTML::Template->new( filename          => "quarantine.tmpl",
                                         loop_context_vars => 1 );
 
     my @entries = readIndexes($domain);
@@ -241,22 +241,22 @@ sub showQuarantine
     {
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
-        $to   =~ s/^<|>$//g;
-        $to   =~ s/@(.*)$//g;
-        $file = basename($file) if ( $file );;
+        $to =~ s/^<|>$//g;
+        $to =~ s/@(.*)$//g;
+        $file = basename($file) if ($file);
 
-        push(@$entries , {
-                          from => $from,
-                          to => $to,
-                          file => $file,
-                          domain => $domain,
-                          subject => $subject,
-                          } );
+        push( @$entries,
+              {  from    => $from,
+                 to      => $to,
+                 file    => $file,
+                 domain  => $domain,
+                 subject => $subject,
+              } );
         $count += 1;
     }
 
-    $template->param( entries => $entries ) if ( $entries );
-    $template->param( count => $count );
-    $template->param( domain => $domain );
+    $template->param( entries => $entries ) if ($entries);
+    $template->param( count   => $count );
+    $template->param( domain  => $domain );
     print $template->output();
 }
