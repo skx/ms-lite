@@ -23,11 +23,23 @@ sub hook_data_post
     my $helo        = $self->qp->connection->hello_host;
 
     #
+    # MAIL FROM / RCPT TO values
+    #
+    my $from = $transaction->get("MAIL-FROM" );
+    my $to   = $transaction->get("RCPT-TO" );
+
+    #
     # Store hosts.
     #
     $transaction->header->add( 'X-HELO',        $helo );
     $transaction->header->add( 'X-REMOTE-IP',   $remote_ip );
     $transaction->header->add( 'X-REMOTE-HOST', $remote_host );
+
+    #
+    # Store sender/recipient
+    #
+    $transaction->header->add( 'X-MAIL-FROM', $from );
+    $transaction->header->add( 'X-RCPT-TO',   $to );
 
     #
     #  If rejected store the reasons.
