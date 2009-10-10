@@ -3,21 +3,30 @@
  <head>
   <title>Quarantine for <!-- tmpl_var name='domain' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></title>
     <script type="text/javascript" src="/js/jquery.js"></script>
-    <script type="text/javascript" src="/js/jquery.stripy.js"></script>
     <script type="text/javascript" charset="utf-8">
             $(function(){
-$("#table").stripy(
-        {  background_even: '#fefefe',
-                      background_odd: '#fefefe',
-                      background_hover: 'silver',
-       } )
+
+                //
+                // Make each entry cell link to the URL
+                $("div.entry").click(
+                        function()
+                        {
+                            window.location = $(this).attr("url");
+                            return false;
+                        });
             });
+
          </script>
 <style type="text/css">
 .entry {
         border: 1px solid grey;
         padding-top: 1px;
         padding-bottom:1px;
+}
+.entry:hover {
+        cursor:pointer;
+        background: silver;
+        border: 1px solid black;
 }
 .entry .title {
         font-size: 140%;
@@ -45,7 +54,7 @@ $("#table").stripy(
 <!-- tmpl_if name='entries' -->
 <blockquote>
  <!-- tmpl_loop name='entries' -->
-<div class="entry">
+<div class="entry" url="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->">
   <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
   <div class="details">
    From <!-- tmpl_var name='from' escape='html' --> to &lt;<!-- tmpl_var name='to' escape='html' -->@<!-- tmpl_var name='domain' -->&gt;
