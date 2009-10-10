@@ -66,7 +66,7 @@ else
     #  Show quarantine contents
     #
     print "Content-type: text/html\n\n";
-    print "Domain: $domain\n";
+    print "<h2>$domain</h2>\n";
 
     my @entries = readIndexes($domain);
 
@@ -76,7 +76,7 @@ else
         exit;
     }
 
-    print "<table>\n";
+    print "<table border=1>\n";
     print "<tr><td>From</td><td>TO</td><td>Subject</td></tr>\n";
     foreach my $line (@entries)
     {
@@ -165,14 +165,26 @@ sub showDomainList
     #
     print "Content-type: text/html\n\n";
 
-    my @domains = ();
+    my %all;  
+    my %spam ;
 
+    #
+    #  Find all domains on the system.
+    #
     foreach my $dir ( sort( glob("/srv/*") ) )
     {
         my $domain = basename($dir);
-        push( @domains, $domain );
+        $all{$domain}=1;
     }
 
+    #
+    #  Find all domains which have received spam.
+    #
+    foreach my $dir ( sort( glob( "/spam/*/*" ) ) )
+    {
+        my $domain = basename($dir );
+        $spam{$domain}=1;
+    }
 
     print <<EOH;
 <html>
@@ -180,20 +192,35 @@ sub showDomainList
   <title>Mail-Scanning-Lite: Choose a domain</title>
  </head>
  <body>
- <h2>Mail-Scanning-Lite: Choose A Domain</h2>
+ <h1>Mail-Scanning-Lite</h1>
+
+
  <blockquote>
+ <h2>Spammed Domains</h2>
  <ul>
 EOH
+    foreach my $domain (keys %spam )
+    {
+        print
+          "<li><a href=\"/cgi-bin/quarantine.cgi?domain=$domain\n\">$domain</a></li>\n";
+    }
 
-    foreach my $domain (@domains)
+    print <<EOF;
+  </ul>
+  </blockquote>
+  <blockquote>
+  <h2>All Domains</h2>
+  <ul>
+EOF
+
+    foreach my $domain (keys %all )
     {
         print
           "<li><a href=\"/cgi-bin/quarantine.cgi?domain=$domain\n\">$domain</a></li>\n";
     }
 
 
-    print <<EOF;
-  </ul>
+  print <<EOF;
  </body>
 </html>
 EOF
