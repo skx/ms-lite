@@ -345,7 +345,7 @@ sub showQuarantine
     }
 
     $template->param( entries => $entries ) if ($entries);
-    $template->param( count   => $count );
+    $template->param( count   => $count ) if ( $count > 0 );
     $template->param( domain  => $domain );
     $template->param( page    => $page )    if ($page);
     print $template->output();
