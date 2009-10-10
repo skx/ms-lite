@@ -77,6 +77,7 @@ sub hook_data_post
         #
         foreach my $term ( split( /,/, $val ) )
         {
+
             #
             # strip whitespace
             #
@@ -102,7 +103,8 @@ sub hook_data_post
             {
                 $transaction->notes( "reject",  1 );
                 $transaction->notes( "blocker", $self->plugin_name() );
-                $transaction->notes( "reason",  "Bogus initial character $header header : $term" );
+                $transaction->notes( "reason",
+                             "Bogus initial character $header header : $term" );
                 return DECLINED;
             }
 
@@ -113,7 +115,8 @@ sub hook_data_post
             {
                 $transaction->notes( "reject",  1 );
                 $transaction->notes( "blocker", $self->plugin_name() );
-                $transaction->notes( "reason",  "$header: contains two '\@' signs : $term" );
+                $transaction->notes( "reason",
+                                   "$header: contains two '\@' signs : $term" );
                 return DECLINED;
             }
 
@@ -125,7 +128,8 @@ sub hook_data_post
             {
                 $transaction->notes( "reject",  1 );
                 $transaction->notes( "blocker", $self->plugin_name() );
-                $transaction->notes( "reason",  "$header: contained value without an '\@': $term" );
+                $transaction->notes( "reason",
+                            "$header: contained value without an '\@': $term" );
                 return DECLINED;
             }
         }

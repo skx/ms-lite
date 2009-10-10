@@ -46,7 +46,7 @@ my $cgi = new CGI;
 #
 # Get any supplied password.
 #
-my $passwd = $cgi->param("passwd" ) || undef;
+my $passwd = $cgi->param("passwd") || undef;
 
 
 #
@@ -213,9 +213,9 @@ sub showDomainList
     #
     #  Load the template, set the values, and exit.
     #
-    my $template = HTML::Template->new( filename => "domains.tmpl" ,
+    my $template = HTML::Template->new( filename    => "domains.tmpl",
                                         global_vars => 1 );
-    $template->param( passwd   => $passwd )  if ($passwd);
+    $template->param( passwd       => $passwd )       if ($passwd);
     $template->param( all_domains  => $all_domains )  if ($all_domains);
     $template->param( spam_domains => $spam_domains ) if ($spam_domains);
     print $template->output();
@@ -292,9 +292,9 @@ sub showQuarantine
     #
     #  Load the template
     #
-    my $template = HTML::Template->new( filename => "quarantine.tmpl",
-                                      global_vars => 1);
-    $template->param( domain  => $domain );
+    my $template = HTML::Template->new( filename    => "quarantine.tmpl",
+                                        global_vars => 1 );
+    $template->param( domain => $domain );
 
     #
     #  Find all the details of the rejected mails.
@@ -322,7 +322,7 @@ sub showQuarantine
     #
     my $entries;
 
-    my $cur    = 0;
+    my $cur = 0;
     foreach my $line (@avail)
     {
         $cur += 1;
@@ -360,9 +360,9 @@ sub showQuarantine
         $i += 1;
     }
 
-    $template->param( passwd => $passwd ) if ($passwd);
+    $template->param( passwd  => $passwd )  if ($passwd);
     $template->param( entries => $entries ) if ($entries);
-    $template->param( count   => $count ) if ( $count > 0 );
+    $template->param( count   => $count )   if ( $count > 0 );
     $template->param( page    => $page )    if ($page);
     print $template->output();
 }
@@ -370,18 +370,19 @@ sub showQuarantine
 
 sub checkPassword
 {
-    open( PASSWD,"<", "/spam/passwd" )
-      or die "Failed to read password: $!";
+    open( PASSWD, "<", "/spam/passwd" ) or
+      die "Failed to read password: $!";
     my $line = <PASSWD>;
-    close( PASSWD );
+    close(PASSWD);
 
-    chomp( $line );
+    chomp($line);
 
-    if ( !defined($passwd) ||  ( $passwd ne $line ) )
+    if ( !defined($passwd) || ( $passwd ne $line ) )
     {
         print "Content-type: text/html\n\n";
-        my $template = HTML::Template->new( filename => "login.tmpl" ,
-                                            global_vars => 1 );
+        my $template =
+          HTML::Template->new( filename    => "login.tmpl",
+                               global_vars => 1 );
         print $template->output();
         exit;
     }
