@@ -25,8 +25,8 @@ sub hook_data_post
     #
     # MAIL FROM / RCPT TO values
     #
-    my $from = $transaction->get("MAIL-FROM" );
-    my $to   = $transaction->get("RCPT-TO" );
+    my $from = $transaction->notes("MAIL-FROM" );
+    my $to   = $transaction->notes("RCPT-TO" );
 
     #
     # Store hosts.
