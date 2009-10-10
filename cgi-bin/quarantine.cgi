@@ -112,7 +112,7 @@ EOF
     #
     #  The file should be located beneath /spam/$day/$domain/new/$file
     #
-    foreach my $entry ( glob( "/spam/*/$domain/new/$file" ) )
+    foreach my $entry ( glob("/spam/*/$domain/new/$file") )
     {
         if ( -e $entry )
         {
