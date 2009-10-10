@@ -105,6 +105,7 @@ Content-type: text/html
  </body>
 </html>
 EOF
+        exit;
     }
 
 
