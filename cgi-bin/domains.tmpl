@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+ <head>
+  <title>Domain List</title>
+ </head>
+ <body>
+ <h1>Mail-Scanning-Lite</h1>
+
+<!-- tmpl_if name='spam_domains' -->
+ <h2 style="border-bottom:1px solid black;">Spammed Domains</h2>
+ <blockquote>
+ <ul>
+<!-- tmpl_loop name='spam_domains' -->
+<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->"><!-- tmpl_var name='domain' --></a></li>
+<!-- /tmpl_loop -->
+ </ul>
+ </blockquote>
+<!-- /tmpl_if -->
+
+
+<!-- tmpl_if name='all_domains' -->
+ <h2 style="border-bottom:1px solid black;">All Domains</h2>
+ <blockquote>
+ <ul>
+<!-- tmpl_loop name='all_domains' -->
+<li><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' -->"><!-- tmpl_var name='domain' --></a></li>
+<!-- /tmpl_loop -->
+  </ul>
+ </blockquote>
+<!-- /tmpl_if -->
+
+ </body>
+</html>

@@ -31,7 +31,7 @@ use warnings;
 
 use CGI;
 use File::Basename;
-
+use HTML::Template;
 
 
 
@@ -157,16 +157,10 @@ sub showFile
 
 sub showDomainList
 {
-
-    #
-    #  For each directory beneath /spam/ add it to the list
-    # if we found a matching directory beneath /srv
-    #
-    #
     print "Content-type: text/html\n\n";
 
-    my %all;  
-    my %spam ;
+    my %all;
+    my %spam;
 
     #
     #  Find all domains on the system.
@@ -186,44 +180,28 @@ sub showDomainList
         $spam{$domain}=1;
     }
 
-    print <<EOH;
-<html>
- <head>
-  <title>Mail-Scanning-Lite: Choose a domain</title>
- </head>
- <body>
- <h1>Mail-Scanning-Lite</h1>
+    #
+    #  Create the loops
+    #
+    my $all_domains;
+    my $spam_domains;
 
-
- <blockquote>
- <h2>Spammed Domains</h2>
- <ul>
-EOH
-    foreach my $domain (keys %spam )
+    foreach my $d ( sort keys %all )
     {
-        print
-          "<li><a href=\"/cgi-bin/quarantine.cgi?domain=$domain\n\">$domain</a></li>\n";
+        push(@$all_domains,{ domain => $d} );
+    }
+    foreach my $d ( sort keys %spam)
+    {
+        push(@$spam_domains,{ domain => $d} );
     }
 
-    print <<EOF;
-  </ul>
-  </blockquote>
-  <blockquote>
-  <h2>All Domains</h2>
-  <ul>
-EOF
-
-    foreach my $domain (keys %all )
-    {
-        print
-          "<li><a href=\"/cgi-bin/quarantine.cgi?domain=$domain\n\">$domain</a></li>\n";
-    }
-
-
-  print <<EOF;
- </body>
-</html>
-EOF
+    #
+    #  Load the template, set the values, and exit.
+    #
+    my $template = HTML::Template->new( filename => "domains.tmpl" );
+    $template->param( all_domains => $all_domains ) if ( $all_domains );
+    $template->param( spam_domains => $spam_domains ) if ( $spam_domains );
+    print $template->output();
 }
 
 
