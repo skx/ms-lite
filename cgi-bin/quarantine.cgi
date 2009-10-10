@@ -94,7 +94,8 @@ sub showFile
     {
         my ( $from, $to, $name, $subject ) = split( /\|/, $line );
 
-        my $path = basename($name);
+        my $path = $name;
+        $path = basename($path) if ( $path );
 
         if ( $path eq $file )
         {
