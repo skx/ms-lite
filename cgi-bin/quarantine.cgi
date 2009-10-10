@@ -82,7 +82,8 @@ else
     {
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
-        $from =~ s/^<|>$//g;
+        $from =~ s/</&lt;/g;
+        $from =~ s/>/&gt;/g;
         $to   =~ s/^<|>$//g;
         $to   =~ s/@(.*)$//g;
         $file = basename($file);
