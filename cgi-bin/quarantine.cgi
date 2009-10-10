@@ -379,6 +379,7 @@ sub checkPassword
 
     if ( !defined($passwd) ||  ( $passwd ne $line ) )
     {
+        print "Content-type: text/html\n\n";
         my $template = HTML::Template->new( filename => "login.tmpl" ,
                                             global_vars => 1 );
         print $template->output();
