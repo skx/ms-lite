@@ -235,6 +235,7 @@ sub showQuarantine
     }
 
     my $entries;
+    my $count = 0;
 
     foreach my $line (@entries)
     {
@@ -251,9 +252,11 @@ sub showQuarantine
                           domain => $domain,
                           subject => $subject,
                           } );
+        $count += 1;
     }
 
     $template->param( entries => $entries ) if ( $entries );
+    $template->param( count => $count );
     $template->param( domain => $domain );
     print $template->output();
 }
