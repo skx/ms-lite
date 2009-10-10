@@ -90,6 +90,7 @@ sub showFile
     #
     if ( $file =~ /(\\|\/|\.\.)/ )
     {
+        print "Content-type: text/plain\n\n";
         print "Invalid filename\n";
         exit;
     }
