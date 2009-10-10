@@ -104,7 +104,7 @@ Content-type: text/html
  <body>
   <h1>Invalid Message</h1>
   <blockquote>
-  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
+  <p>Please return to the <a href="?domain=$domain;passwd=$passwd">domain index</a>.</p>
   </blockquote>
  </body>
 </html>
@@ -143,7 +143,7 @@ Content-type: text/html
  <body>
   <h1>Message Not Found</h1>
   <blockquote>
-  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
+  <p>Please return to the <a href="?domain=$domain;passwd=$passwd">domain index</a>.</p>
   </blockquote>
  </body>
 </html>
