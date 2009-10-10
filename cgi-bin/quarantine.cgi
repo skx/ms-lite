@@ -245,6 +245,9 @@ sub readIndexes
     my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
       localtime(time);
 
+    #
+    #  Number of days to make available over the web.
+    #
     my $count = 5;
 
     while ( $count > 0 )
@@ -284,9 +287,6 @@ sub showQuarantine
 {
     my ($domain) = (@_);
 
-    #
-    #  Show quarantine contents
-    #
     print "Content-type: text/html\n\n";
 
     #
@@ -297,13 +297,13 @@ sub showQuarantine
     $template->param( domain => $domain );
 
     #
-    #  Find all the details of the rejected mails.
+    #  Find the details of all rejected mails.
     #
     my @avail = readIndexes($domain);
     my $count = scalar(@avail);
 
     #
-    #  No messages?
+    #  No messages?  Then show the empty page and return.
     #
     if ( $count <= 0 )
     {
@@ -344,7 +344,7 @@ sub showQuarantine
     }
 
     #
-    #  Paging.
+    #  Paging details
     #
     my $page;
     my $pages = int( $count / 1000 );
@@ -367,6 +367,16 @@ sub showQuarantine
     print $template->output();
 }
 
+
+
+=begin doc
+
+ If there is a password file present then check one was given
+and matches it.
+
+=end doc
+
+=cut
 
 sub checkPassword
 {
