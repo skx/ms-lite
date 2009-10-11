@@ -34,6 +34,7 @@ exit;
 
 sub getRecent
 {
+
     #
     #  Values to return
     #
@@ -49,7 +50,7 @@ sub getRecent
     #  Find all indexes
     #
     my @files = glob("/spam/$yday/*/index");
-    return (@ret ) if ( ! scalar(@files ) );
+    return (@ret) if ( !scalar(@files) );
 
     #
     #  Sort them by modification date/time.
@@ -60,7 +61,7 @@ sub getRecent
     #  The most recent.
     #
     my $name = $sorted[0] || undef;
-    return( @ret ) if ( !defined($name) );
+    return (@ret) if ( !defined($name) );
 
     #
     #  Open & read
@@ -129,7 +130,7 @@ sub showRecent
     #  Load the template and set the values in it.
     #
     my $template = HTML::Template->new( filename => "recent.tmpl" );
-    $template->param( entries => $entries ) if ( $entries );
+    $template->param( entries => $entries ) if ($entries);
 
     #
     #  Display it
