@@ -153,13 +153,17 @@ EOF
                 #
                 if ( $header && ( $line =~ /^X-REJECT/ ) )
                 {
-                    $line = "<span style=\"color: red !important;\">$line</span>";
+                    $line =
+                      "<span style=\"color: red !important;\">$line</span>";
                 }
 
                 #
                 #  Bold certain mail headers.
                 #
-                if ( $header && ( $line =~/^(To:|X-HELO|X-REJECT|X-MAIL-FROM|X-RCPT-TO|X-REMOTE-IP|X-REMOTE-HOST|From:|Subject:)/ ) )
+                if ($header &&
+                    ( $line =~
+                        /^(To:|X-HELO|X-REJECT|X-MAIL-FROM|X-RCPT-TO|X-REMOTE-IP|X-REMOTE-HOST|From:|Subject:)/
+                    ) )
                 {
                     $line = "<b>$line</b>";
                 }

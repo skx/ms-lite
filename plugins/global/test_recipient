@@ -102,8 +102,8 @@ sub hook_rcpt
         #
         #  Rejected
         #
-        $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Relay attempt for \@$host rejected" );
+        $transaction->notes( "reject",  1 );
+        $transaction->notes( "reason",  "Relay attempt for \@$host rejected" );
         $transaction->notes( "blocker", $self->plugin_name() );
 
         return ( DENY, "Relay attempt for $host" );
