@@ -40,7 +40,8 @@ sub hook_data_post
     #
     #  Is the IP blacklisted?
     #
-    if ( -e "/srv/$domain/blacklisted/ips/$remote_ip" )
+    if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" ) ||
+         ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) )
     {
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason",

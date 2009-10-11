@@ -49,7 +49,8 @@ sub hook_data_post
     #
     my $remote_ip = $self->qp->connection->remote_ip;
 
-    if ( -e "/srv/$domain/whitelisted/ips/$remote_ip" )
+    if ( ( -e "/srv/$domain/whitelisted/ips/$remote_ip" ) ||
+         ( -e "/srv/_global_/whitelisted/ips/$remote_ip" ) )
     {
 
         #
@@ -72,7 +73,8 @@ sub hook_data_post
     #
     #  Is the sender whitelisted?
     #
-    if ( -e "/srv/$domain/whitelisted/senders/$sender" )
+    if ( ( -e "/srv/$domain/whitelisted/senders/$sender" ) ||
+         ( -e "/srv/_global_/whitelisted/senders/$sender" ) )
     {
 
         #
@@ -98,7 +100,8 @@ sub hook_data_post
             $recipient = $1;
         }
 
-        if ( -e "/srv/$domain/whitelisted/recipients/$recipient" )
+        if ( ( -e "/srv/$domain/whitelisted/recipients/$recipient" ) ||
+             ( -e "/srv/_global_/whitelisted/recipients/$recipient" ) )
         {
 
             #
