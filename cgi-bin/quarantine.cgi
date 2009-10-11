@@ -388,7 +388,7 @@ sub showQuarantine
 
 sub handleSearch
 {
-    my ($domain,$search) = (@_);
+    my ( $domain, $search ) = (@_);
 
     print "Content-type: text/html\n\n";
 
@@ -409,7 +409,7 @@ sub handleSearch
 
     foreach my $line (@avail)
     {
-        next unless( $line =~ /\Q$search\E/i );
+        next unless ( $line =~ /\Q$search\E/i );
 
         my ( $from, $to, $file, $subject ) = split( /\|/, $line );
 
@@ -428,7 +428,7 @@ sub handleSearch
     }
 
     $template->param( passwd  => $passwd )  if ($passwd);
-    $template->param( search   => $search )  if ($search);
+    $template->param( search  => $search )  if ($search);
     $template->param( entries => $entries ) if ($entries);
     print $template->output();
 }
