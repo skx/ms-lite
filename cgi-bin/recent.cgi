@@ -103,6 +103,7 @@ sub showRecent
 
     $template->param( entries => $entries );
 
+    print "Content-type: text/html\n\n";
     print $template->output();
 
 }
