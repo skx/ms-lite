@@ -104,6 +104,7 @@ sub hook_rcpt
         #
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "Relay attempt for \@$host rejected" );
+        $transaction->notes( "blocker", $self->plugin_name() );
 
         return ( DENY, "Relay attempt for $host" );
     }
@@ -120,6 +121,7 @@ sub hook_rcpt
         #
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "Mail for $user not accepted at $host" );
+        $transaction->notes( "blocker", $self->plugin_name() );
 
         return OK;
     }
@@ -144,7 +146,13 @@ sub hook_rcpt
         #
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "Mail for $user not accepted at $host" );
+        $transaction->notes( "blocker", $self->plugin_name() );
 
+        #
+        #  Return OK, even though we'll drop the mail, because otherwise
+        # we'll get an error from qpsmtpd "No plugin decided whether
+        # relaying was allowed".
+        #
         return OK;
     }
 }
