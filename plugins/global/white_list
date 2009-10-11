@@ -73,8 +73,9 @@ sub hook_data_post
     #
     #  Is the sender whitelisted?
     #
-    if ( ( -e "/srv/$domain/whitelisted/senders/$sender" ) ||
-         ( -e "/srv/_global_/whitelisted/senders/$sender" ) )
+    if ( length($sender) &&
+         ( ( -e "/srv/$domain/whitelisted/senders/$sender" ) ||
+           ( -e "/srv/_global_/whitelisted/senders/$sender" ) ) )
     {
 
         #
