@@ -34,6 +34,10 @@ exit;
 
 sub getRecent
 {
+    #
+    #  Values to return
+    #
+    my @ret;
 
     #
     #  Get the year day.
@@ -45,19 +49,29 @@ sub getRecent
     #  Find all indexes
     #
     my @files = glob("/spam/$yday/*/index");
-    my @sorted = sort {( stat($a) )[9] <=> ( stat($b) )[9]} @files;
+    return (@ret ) if ( ! scalar(@files ) );
+
+    #
+    #  Sort them by modification date/time.
+    #
+    my @sorted = sort {( stat($b) )[9] <=> ( stat($a) )[9]} @files;
 
     #
     #  The most recent.
     #
-    my $name = $sorted[0];
+    my $name = $sorted[0] || undef;
+    return( @ret ) if ( !defined($name) );
+
+    #
+    #  Open & read
+    #
     open( INDEX, "<", $name );
-
     my @lines = reverse <INDEX>;
-
     close(INDEX);
 
-    my @ret;
+    #
+    #  Build up no more than ten lines.
+    #
     my $count = 10;
     foreach my $line (@lines)
     {
@@ -66,16 +80,26 @@ sub getRecent
         $count -= 1;
     }
 
+    #
+    #  Return
+    #
     return (@ret);
 
 }
 
 
+=begin doc
+
+ Show recent SPAM, via the template.
+
+=end doc
+
+=cut
+
 sub showRecent
 {
     my (@recent) = (@_);
 
-    my $template = HTML::Template->new( filename => "recent.tmpl" );
 
     my $entries;
 
@@ -101,8 +125,15 @@ sub showRecent
               } );
     }
 
-    $template->param( entries => $entries );
+    #
+    #  Load the template and set the values in it.
+    #
+    my $template = HTML::Template->new( filename => "recent.tmpl" );
+    $template->param( entries => $entries ) if ( $entries );
 
+    #
+    #  Display it
+    #
     print "Content-type: text/html\n\n";
     print $template->output();
 
