@@ -42,21 +42,20 @@
  <body>
  <h1>Search results for <tt><!-- tmpl_var name='search' escape='html' --></tt></h1>
  <blockquote>
-  <p><a href="/cgi-bin/quarantine.cgi?passwd=<!-- tmpl_var name='passwd' escape='html' -->">Return to domain list</a>, or <a href="/cgi-bin/quarantine.cgi?passwd=<!-- tmpl_var name='passwd' escape='html' -->;domain=<!-- tmpl_var name='domain' escape='html' -->"><!-- tmpl_var name='domain' escape='html' --></a>.</p>
+  <p><a href="/cgi-bin/quarantine.cgi">Return to domain list</a>, or <a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->"><!-- tmpl_var name='domain' escape='html' --></a>.</p>
  </blockquote>
 
 
 <form style="display:inline;" method="post" action="/cgi-bin/quarantine.cgi">
  <input type="hidden" name="domain" value="<!-- tmpl_var name='domain' escape='html' -->">
- <input type="hidden" name="passwd" value="<!-- tmpl_var name='passwd' escape='html' -->">
  <input type="text" name="search" value="<!-- tmpl_var name='search' escape='html' -->">
 </form>
 
 <!-- tmpl_if name='entries' -->
 <blockquote>
  <!-- tmpl_loop name='entries' -->
-<div class="entry" url="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;file=<!-- tmpl_var name='file' -->">
-  <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
+<div class="entry" url="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;file=<!-- tmpl_var name='file' -->">
+  <div class="title"><a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;file=<!-- tmpl_var name='file' -->"><!-- tmpl_var name='subject' escape='html' --></a></div>
   <div class="details">
    From <!-- tmpl_var name='from' escape='html' --> to &lt;<!-- tmpl_var name='to' escape='html' -->@<!-- tmpl_var name='domain' escape='html' -->&gt;
   </div>

@@ -43,20 +43,6 @@ use HTML::Template;
 #
 my $cgi = new CGI;
 
-#
-# Get any supplied password.
-#
-my $passwd = $cgi->param("passwd") || undef;
-
-
-#
-#  If we're ACLd then we'll avoid reading unless there is a password.
-#
-if ( -e "/spam/passwd" )
-{
-    checkPassword();
-}
-
 
 #
 #  If we've not been given a domain then show the domain list.
@@ -122,7 +108,7 @@ Content-type: text/html
  <body>
   <h1>Invalid Message</h1>
   <blockquote>
-  <p>Please return to the <a href="?domain=$domain;passwd=$passwd">domain index</a>.</p>
+  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
   </blockquote>
  </body>
 </html>
@@ -184,7 +170,7 @@ Content-type: text/html
  <body>
   <h1>Message Not Found</h1>
   <blockquote>
-  <p>Please return to the <a href="?domain=$domain;passwd=$passwd">domain index</a>.</p>
+  <p>Please return to the <a href="?domain=$domain">domain index</a>.</p>
   </blockquote>
  </body>
 </html>
@@ -247,7 +233,6 @@ sub showDomainList
     #
     my $template = HTML::Template->new( filename    => "domains.tmpl",
                                         global_vars => 1 );
-    $template->param( passwd       => $passwd )       if ($passwd);
     $template->param( all_domains  => $all_domains )  if ($all_domains);
     $template->param( spam_domains => $spam_domains ) if ($spam_domains);
     print $template->output();
@@ -392,7 +377,6 @@ sub showQuarantine
         $i += 1;
     }
 
-    $template->param( passwd  => $passwd )  if ($passwd);
     $template->param( entries => $entries ) if ($entries);
     $template->param( count   => $count )   if ( $count > 0 );
     $template->param( page    => $page )    if ($page);
@@ -450,38 +434,9 @@ sub handleSearch
 
     }
 
-    $template->param( passwd  => $passwd )  if ($passwd);
     $template->param( search  => $search )  if ($search);
     $template->param( entries => $entries ) if ($entries);
     print $template->output();
 }
 
 
-=begin doc
-
- If there is a password file present then check one was given
-and matches it.
-
-=end doc
-
-=cut
-
-sub checkPassword
-{
-    open( PASSWD, "<", "/spam/passwd" ) or
-      die "Failed to read password: $!";
-    my $line = <PASSWD>;
-    close(PASSWD);
-
-    chomp($line);
-
-    if ( !defined($passwd) || ( $passwd ne $line ) )
-    {
-        print "Content-type: text/html\n\n";
-        my $template =
-          HTML::Template->new( filename    => "login.tmpl",
-                               global_vars => 1 );
-        print $template->output();
-        exit;
-    }
-}
