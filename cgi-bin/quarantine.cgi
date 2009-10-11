@@ -138,15 +138,38 @@ EOF
     {
         if ( -e $entry )
         {
-            print "Content-type: text/plain\n\n";
+            print <<EOF;
+Content-type: text/html
 
+
+<html>
+ <head>
+  <title>Message $file</title>
+ </head>
+ <body>
+ <pre>
+EOF
+
+            my $header = 1;
             open( SPAM, "<", "$entry" ) or
               die "Failed to open $entry - $!\n";
             while ( my $line = <SPAM> )
             {
-                print $line;
+                chomp($line);
+
+                $header = 0 if ( $line =~ /^$/ );
+
+                $line =~ s/</&lt;/g;
+                $line =~ s/>/&gt;/g;
+                if ( $header && ( $line =~/^(To:|X-HELO|X-MAIL-FROM|X-REJECT|X-RCPT-TO|X-REMOTE-IP|X-REMOTE-HOST|From:|Subject:)/ ) )
+                {
+                    $line = "<b>$line</b>";
+                }
+
+                print $line . "\n";
             }
             close(SPAM);
+            print "</pre>\n</body>\n</html>\n";
             exit;
         }
     }
