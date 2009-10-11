@@ -1,7 +1,7 @@
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
  <head>
-  <title>Quarantine for <!-- tmpl_var name='domain' escape='html' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></title>
+  <title>Search results for <!-- tmpl_var name='search' escape='html' --></title>
     <script type="text/javascript" src="/js/jquery.js"></script>
     <script type="text/javascript" charset="utf-8">
             $(function(){
@@ -40,25 +40,18 @@
 </style>
  </head>
  <body>
- <h1>quarantine for <!-- tmpl_var name='domain' escape='html' --> <!-- tmpl_if name='count' -->[<!-- tmpl_var name='count' -->]<!-- /tmpl_if --></h1>
+ <h1>Search results for <tt><!-- tmpl_var name='search' escape='html' --></tt></h1>
  <blockquote>
-  <p><a href="/cgi-bin/quarantine.cgi?passwd=<!-- tmpl_var name='passwd' escape='html' -->">Return to domain list.</a></p>
+  <p><a href="/cgi-bin/quarantine.cgi?passwd=<!-- tmpl_var name='passwd' escape='html' -->">Return to domain list</a>, or <a href="/cgi-bin/quarantine.cgi?passwd=<!-- tmpl_var name='passwd' escape='html' -->;domain=<!-- tmpl_var name='domain' escape='html' -->"><!-- tmpl_var name='domain' escape='html' --></a>.</p>
  </blockquote>
-<!-- tmpl_if name='page' -->
-<table width="100%">
-<tr><td><p>Pages:
-<!-- tmpl_loop name='page' -->
- <a href="/cgi-bin/quarantine.cgi?domain=<!-- tmpl_var name='domain' escape='html' -->;passwd=<!-- tmpl_var name='passwd' escape='html' -->;start=<!-- tmpl_var name='start' -->"><!-- tmpl_var name='page' --></a>
-<!-- /tmpl_loop -->
-     </p>
-    </td>
-   <td width="50%"><form style="display:inline;" method="post" action="/cgi-bin/quarantine.cgi">
+
+
+<form style="display:inline;" method="post" action="/cgi-bin/quarantine.cgi">
  <input type="hidden" name="domain" value="<!-- tmpl_var name='domain' escape='html' -->">
  <input type="hidden" name="passwd" value="<!-- tmpl_var name='passwd' escape='html' -->">
- <input type="text" name="search" value="x">
+ <input type="text" name="search" value="<!-- tmpl_var name='search' escape='html' -->">
 </form>
-</td></tr></table>
-<!-- /tmpl_if -->
+
 <!-- tmpl_if name='entries' -->
 <blockquote>
  <!-- tmpl_loop name='entries' -->
@@ -72,7 +65,7 @@
  <!-- /tmpl_loop -->
 </blockquote>
 <!-- tmpl_else -->
- <p>No rejected mail.</p>
+ <p>No matches found.</p>
 <!-- /tmpl_if -->
 
  </body>

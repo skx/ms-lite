@@ -78,6 +78,15 @@ if ( $cgi->param("file") )
 }
 
 #
+#  Searching?
+#
+if ( $cgi->param("search") )
+{
+    handleSearch( $domain, $cgi->param("search") );
+    exit;
+}
+
+#
 #  Otherwise show the quarantine for the given domain.
 #
 showQuarantine($domain);
@@ -367,6 +376,62 @@ sub showQuarantine
     print $template->output();
 }
 
+
+
+=begin doc
+
+  Handle a search.
+
+=end doc
+
+=cut
+
+sub handleSearch
+{
+    my ($domain,$search) = (@_);
+
+    print "Content-type: text/html\n\n";
+
+    #
+    #  Load the template
+    #
+    my $template = HTML::Template->new( filename    => "results.tmpl",
+                                        global_vars => 1 );
+    $template->param( domain => $domain );
+
+    #
+    #  Find the details of all rejected mails.
+    #
+    my @avail = readIndexes($domain);
+    my $count = scalar(@avail);
+
+    my $entries;
+
+    foreach my $line (@avail)
+    {
+        next unless( $line =~ /\Q$search\E/i );
+
+        my ( $from, $to, $file, $subject ) = split( /\|/, $line );
+
+        $to =~ s/^<|>$//g;
+        $to =~ s/@(.*)$//g;
+        $file = basename($file) if ($file);
+
+        push( @$entries,
+              {  from    => $from,
+                 to      => $to,
+                 file    => $file,
+                 domain  => $domain,
+                 subject => $subject,
+              } );
+
+    }
+
+    $template->param( passwd  => $passwd )  if ($passwd);
+    $template->param( search   => $search )  if ($search);
+    $template->param( entries => $entries ) if ($entries);
+    print $template->output();
+}
 
 
 =begin doc
