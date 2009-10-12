@@ -217,6 +217,8 @@ sub showDomainList
     foreach my $dir ( sort( glob("/srv/*") ) )
     {
         my $domain = basename($dir);
+        next unless ( $domain =~ /\./ );
+
         $all{ $domain } = 1;
     }
 
