@@ -98,6 +98,23 @@ sub hook_data_post
         return DECLINED;
     }
 
+    #
+    # Reject if ends in
+    #
+    #  .internal
+    #  .lan
+    #  .local
+    #  .localdomain
+    #
+    if ( $helo =~ /\.(lan|localdomain|local|internal)$/ )
+    {
+        $self->log( LOGWARN, "local domain: $helo" );
+
+        $transaction->notes( "reject",  1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
+        $transaction->notes( "reason",  "HELO should not have a local domain" );
+        return DECLINED;
+    }
 
     #
     #  Terminate.
