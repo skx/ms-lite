@@ -76,7 +76,19 @@ sub hook_queue
         return ( DENY, $reason );
     }
 
+    #
+    # get the sender + ip + helo name for logging.
+    #
+    my $log_ip   = $self->qp->connection->remote_ip;
+    my $log_host = $self->qp->connection->remote_host;
+    my $log_helo = $self->qp->connection->hello_host;
+    my $log_from = $transaction->notes("MAIL-FROM");
+    my $log_to   = $transaction->notes("RCPT-TO");
 
+    #
+    #  Log a sucess
+    #
+    $self->log( LOGWARN, "global::deliver from:$log_from to:$log_to ip:$log_ip host:$log_host helo:$log_helo" );
 
     my $tmp_dir = $self->qp->config('spool_dir') || '/tmp';
     $tmp_dir = $1 if ( $tmp_dir =~ /(.*)/ );
