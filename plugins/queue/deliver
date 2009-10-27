@@ -62,6 +62,26 @@ sub hook_queue
     my ( $self, $transaction ) = @_;
 
     #
+    #  Get the message ID, used for logging purposes only
+    #
+    my $msg_id = $transaction->header->get('Message-Id') || '';
+    $msg_id =~ s/[\r\n].*//s;    # don't allow newlines in the Message-Id here
+    $msg_id = "<$msg_id>" unless $msg_id =~ /^<.*>$/;    # surround in <>'s
+
+    #
+    # get the sender + ip + helo name for logging.
+    #
+    my $log_ip   = $self->qp->connection->remote_ip;
+    my $log_host = $self->qp->connection->remote_host;
+    my $log_helo = $self->qp->connection->hello_host;
+    my $log_from = $transaction->notes("MAIL-FROM") || "<>";
+    my $log_to   = join( ',', $transaction->recipients );
+
+    my @log_message;
+    push( @log_message, $log_ip, $log_host, $log_helo, $log_from, $log_to );
+    map {s/\t/_/g} @log_message;
+
+    #
     #  Reject if it is rejected and not whitelisted.
     #
     if ( 1 == ( $transaction->notes("reject") || 0 ) )
@@ -71,24 +91,26 @@ sub hook_queue
         my $reason = $transaction->notes("reason") || "uknown reason";
 
         #
+        # Log the failure at a very high level
+        #
+        ##
+        push( @log_message, $reason . "\t$msg_id" );
+        $self->log( LOGCRIT, "'", join( "\t", @log_message ) );
+
+        #
         # reject at SMTP time generating a bounce.
         #
         return ( DENY, $reason );
     }
 
-    #
-    # get the sender + ip + helo name for logging.
-    #
-    my $log_ip   = $self->qp->connection->remote_ip;
-    my $log_host = $self->qp->connection->remote_host;
-    my $log_helo = $self->qp->connection->hello_host;
-    my $log_from = $transaction->notes("MAIL-FROM");
-    my $log_to   = $transaction->notes("RCPT-TO");
 
     #
-    #  Log a sucess
+    # Log the successful delivery at a very high level
     #
-    $self->log( LOGWARN, "global::deliver from:$log_from to:$log_to ip:$log_ip host:$log_host helo:$log_helo" );
+    ##
+    push( @log_message, "accepted and queued\t$msg_id" );
+    $self->log( LOGCRIT, "'", join( "\t", @log_message ) );
+
 
     my $tmp_dir = $self->qp->config('spool_dir') || '/tmp';
     $tmp_dir = $1 if ( $tmp_dir =~ /(.*)/ );
