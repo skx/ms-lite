@@ -1,6 +1,10 @@
 #!/usr/bin/perl -w
 #
-#  Blacklist plugin
+#  This is our global blacklisting plugin, which allows a mail to be
+# rejected (and thus bounced) even if it failed none of our previous checks.
+#
+#  A mail may be blacklisted based upon the envelope sender or the
+# originating IP address.
 #
 # Steve
 # --
@@ -53,9 +57,10 @@ sub hook_data_post
     #
     # Get the sender address, stripping brackets if present
     #
-    my $sender = $transaction->notes("MAIL-FROM");
-    $sender =~ s/^<//g;
-    $sender =~ s/>$//g;
+    my $sender = $transaction->notes("MAIL-FROM") || "<>";
+    $sender    = lc($sender);
+    $sender    =~ s/^<//g;
+    $sender    =~ s/>$//g;
 
     #
     #  Is the sender blacklisted?

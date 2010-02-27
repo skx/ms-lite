@@ -1,6 +1,11 @@
 #!/usr/bin/perl -w
 #
-#  Whitelist plugin
+#  This is our global whitelisting plugin, which allows a mail to be
+# whitelisted (and thus delivered) even if it would have failed one
+# of our previous checks.
+#
+#  A mail may be whitelisted based upon the envelope sender, the
+# originating IP address, or the recipient address.
 #
 # Steve
 # --
@@ -66,7 +71,8 @@ sub hook_data_post
     #
     # Get the sender address, stripping brackets if present
     #
-    my $sender = $transaction->notes("MAIL-FROM");
+    my $sender = $transaction->notes("MAIL-FROM") || "<>";
+    $sender = lc($sender);
     $sender =~ s/^<//g;
     $sender =~ s/>$//g;
 
