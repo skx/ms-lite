@@ -47,6 +47,9 @@ sub hook_data_post
     if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" ) ||
          ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) )
     {
+        #
+        #  Reject.
+        #
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason",
                              "IP address $remote_ip locally blacklisted" );
@@ -69,15 +72,16 @@ sub hook_data_post
          ( ( -e "/srv/$domain/blacklisted/senders/$sender" ) ||
            ( -e "/srv/_global_/blacklisted/senders/$sender" ) ) )
     {
-
         #
-        #  OK this was from a whitelisted sender, remove the note.
+        #  OK this was from a blacklisted sender; reject.
         #
         $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail from $sender is not welcome here" );
+        $transaction->notes( "reason", "Mail not accepted for delivery." );
         return DECLINED;
     }
 
-
+    #
+    #  Not blacklisted.
+    #
     return DECLINED;
 }

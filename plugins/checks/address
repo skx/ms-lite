@@ -60,7 +60,7 @@ sub hook_data_post
     #
     #  Ensure both headers are present
     #
-    foreach my $header (qw! To From !)
+    foreach my $header (qw! From !)
     {
         my $val = $transaction->header->get($header) || undef;
 
@@ -121,17 +121,6 @@ sub hook_data_post
             }
 
 
-            #
-            #  Test for a missing "@" sign
-            #
-            if ( $term !~ /@/ )
-            {
-                $transaction->notes( "reject",  1 );
-                $transaction->notes( "blocker", $self->plugin_name() );
-                $transaction->notes( "reason",
-                            "$header: contained value without an '\@': $term" );
-                return DECLINED;
-            }
         }
     }
 
