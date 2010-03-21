@@ -101,7 +101,7 @@ if ( -e "/spam/today" )
 
 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
   localtime(time);
-link( "/spam/today", "/spam/$yday" );
+symlink( "/spam/$yday", "/spam/today" );
 
 
 
