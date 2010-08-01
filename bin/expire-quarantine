@@ -97,11 +97,16 @@ if ( -e "/spam/today" )
 {
     unlink("/spam/today");
 }
+if ( -e "/spam/yesterday" )
+{
+    unlink("/spam/yesterday");
+}
 
 
 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
   localtime(time);
 symlink( "/spam/$yday", "/spam/today" );
+symlink( "/spam/" . $yday - 1, "/spam/yesterday" );
 
 
 
