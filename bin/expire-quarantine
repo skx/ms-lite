@@ -91,7 +91,7 @@ foreach my $entry ( sort( glob( $CONFIG{ 'prefix' } . "/*" ) ) )
 
 
 #
-#  Ensure that /spam/today points to the current day.
+#  Ensure that /spam/{today yesterday} point to the correct days.
 #
 if ( -e "/spam/today" )
 {
@@ -105,8 +105,13 @@ if ( -e "/spam/yesterday" )
 
 my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
   localtime(time);
+
+# today
 symlink( "/spam/$yday", "/spam/today" );
-symlink( "/spam/" . $yday - 1, "/spam/yesterday" );
+
+# yesterday
+$yday -= 1;
+symlink( "/spam/$yday", "/spam/yesterday" );
 
 
 
