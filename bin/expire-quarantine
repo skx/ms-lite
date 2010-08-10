@@ -110,7 +110,7 @@ my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
 symlink( "/spam/$yday", "/spam/today" );
 
 # yesterday
-$yday -= 1;
+$yday = $yday - 1;
 symlink( "/spam/$yday", "/spam/yesterday" );
 
 
