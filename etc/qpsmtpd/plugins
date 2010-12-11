@@ -168,6 +168,24 @@ checks/rdns
 checks/date
 
 
+##
+#
+# Test and reject mails which are from mailman verifying a post to
+# a moderated list.
+#
+# If you have no mailman lists then this is safe, otherwise it is
+# potentially very dangerous.
+#
+#  This plugin will run if either of the two files are present:
+#
+#   /srv/example.com/checks/mailman
+#   /srv/example.com/checks/all
+#
+#
+###
+
+checks/mailman
+
 
 ##
 #
