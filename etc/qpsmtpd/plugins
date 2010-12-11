@@ -189,7 +189,7 @@ checks/mailman
 
 ##
 #
-# Check the mail body has sensible values in the To: abd From: fields.
+# Check the mail body has sensible values in the To: and From: fields.
 #
 # This plugin is enabled if either of the following files are present:
 #
