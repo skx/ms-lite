@@ -123,89 +123,109 @@ use IO::File;
 use Sys::Hostname;
 use POSIX qw(strftime);
 
-sub register {
-    my ($self, $qp, @args) = @_;
+sub register
+{
+    my ( $self, $qp, @args ) = @_;
     my %args;
 
-    $self->{_loglevel} = LOGWARN;
-    $self->{_tsformat} = '%a %b %d %T %Y'; # same as scalar localtime
+    $self->{ _loglevel } = LOGWARN;
+    $self->{ _tsformat } = '%a %b %d %T %Y';    # same as scalar localtime
 
-    while (1) {
-    	last if !@args;
-    	if (lc $args[0] eq 'loglevel') {
+    while (1)
+    {
+        last if !@args;
+        if ( lc $args[0] eq 'loglevel' )
+        {
             shift @args;
             my $ll = shift @args;
-            if (!defined $ll) {
+            if ( !defined $ll )
+            {
                 warn "Malformed arguments to logging/file plugin";
                 return;
             }
-            if ($ll =~ /^(\d+)$/) {
-                $self->{_loglevel} = $1;
+            if ( $ll =~ /^(\d+)$/ )
+            {
+                $self->{ _loglevel } = $1;
             }
-            elsif ($ll =~ /^(LOG\w+)$/) {
-                $self->{_loglevel} = log_level($1);
-                defined $self->{_loglevel} or $self->{_loglevel} = LOGWARN;
+            elsif ( $ll =~ /^(LOG\w+)$/ )
+            {
+                $self->{ _loglevel } = log_level($1);
+                defined $self->{ _loglevel } or $self->{ _loglevel } = LOGWARN;
             }
         }
-	elsif (lc $args[0] eq 'nosplit') {
-		shift @args;
-		$self->{_nosplit} = 1;
-	}
-	elsif (lc $args[0] eq 'reopen') {
-		shift @args;
-		$self->{_reopen} = 1;
-	}
-	    elsif (lc $args[0] eq 'tsformat') {
-	        shift @args;
-	        my $format = shift @args;
-	        $self->{_tsformat} = $format;
-	    }
-        else { last }
+        elsif ( lc $args[0] eq 'nosplit' )
+        {
+            shift @args;
+            $self->{ _nosplit } = 1;
+        }
+        elsif ( lc $args[0] eq 'reopen' )
+        {
+            shift @args;
+            $self->{ _reopen } = 1;
+        }
+        elsif ( lc $args[0] eq 'tsformat' )
+        {
+            shift @args;
+            my $format = shift @args;
+            $self->{ _tsformat } = $format;
+        }
+        else {last}
     }
 
-    unless (@args && $args[0]) {
+    unless ( @args && $args[0] )
+    {
         warn "Malformed arguments to syslog plugin";
         return;
     }
 
-    my $output = join(' ', @args);
+    my $output = join( ' ', @args );
 
-    if ($output =~ /^\s*\|(.*)/) {
-    	$self->{_log_pipe} = 1;
-        $self->{_log_format} = $1;
-    } else {
-        $output =~ /^(.*)/; # detaint
-        $self->{_log_format} = $1;
+    if ( $output =~ /^\s*\|(.*)/ )
+    {
+        $self->{ _log_pipe }   = 1;
+        $self->{ _log_format } = $1;
     }
-    $self->{_current_output} = '';
-    $self->{_session_counter} = 0;
+    else
+    {
+        $output =~ /^(.*)/;    # detaint
+        $self->{ _log_format } = $1;
+    }
+    $self->{ _current_output }  = '';
+    $self->{ _session_counter } = 0;
     1;
 }
 
-sub log_output {
-    my ($self, $transaction) = @_;
-    my $output = $self->{_log_format};
+sub log_output
+{
+    my ( $self, $transaction ) = @_;
+    my $output = $self->{ _log_format };
     $output =~ s/%i/($transaction->notes('logging-session-id') || 'parent')/ge;
     $output = strftime $output, localtime;
     $output;
 }
 
-sub open_log {
-    my ($self,$output,$qp) = @_;
+sub open_log
+{
+    my ( $self, $output, $qp ) = @_;
 
-    if ($self->{_log_pipe}) {
-        unless ($self->{_f} = new IO::File "|$output") {
+    if ( $self->{ _log_pipe } )
+    {
+        unless ( $self->{ _f } = new IO::File "|$output" )
+        {
             warn "Error opening log output to command $output: $!";
             return undef;
         }
-    } else {
-        unless ($self->{_f} = new IO::File ">>$output") {
+    }
+    else
+    {
+        unless ( $self->{ _f } = new IO::File ">>$output" )
+        {
             warn "Error opening log output to path $output: $!";
             return undef;
         }
     }
-    $self->{_current_output} = $output;
-    $self->{_f}->autoflush(1);
+    $self->{ _current_output } = $output;
+    $self->{ _f }->autoflush(1);
     1;
 }
 
@@ -215,48 +235,57 @@ sub open_log {
 # yet done so during this session.
 #
 # Returns true if the file was reopened, zero if not, undef on error.
-sub maybe_reopen {
-    my ($self, $transaction) = @_;
+sub maybe_reopen
+{
+    my ( $self, $transaction ) = @_;
 
     my $new_output = $self->log_output($transaction);
-    if (!$self->{_current_output} ||
-        $self->{_current_output} ne $new_output ||
-        ($self->{_reopen} &&
-         !$transaction->notes('file-reopened-this-session'))) {
-        unless ($self->open_log($new_output, $transaction)) {
+    if ( !$self->{ _current_output } ||
+         $self->{ _current_output } ne $new_output ||
+         ( $self->{ _reopen } &&
+            !$transaction->notes('file-reopened-this-session') ) )
+    {
+        unless ( $self->open_log( $new_output, $transaction ) )
+        {
             return undef;
         }
-        $transaction->notes('file-reopened-this-session', 1);
+        $transaction->notes( 'file-reopened-this-session', 1 );
         return 1;
     }
     return 0;
 }
 
-sub hook_connect {
-    my ($self, $transaction) = @_;
+sub hook_connect
+{
+    my ( $self, $transaction ) = @_;
 
-    $transaction->notes('file-logged-this-session', 0);
-    $transaction->notes('file-reopened-this-session', 0);
-    $transaction->notes('logging-session-id',
-                sprintf("%08d-%04d-%d",
-                        scalar time, $$, ++$self->{_session_counter}));
+    $transaction->notes( 'file-logged-this-session',   0 );
+    $transaction->notes( 'file-reopened-this-session', 0 );
+    $transaction->notes( 'logging-session-id',
+                         sprintf( "%08d-%04d-%d",
+                                  scalar time, $$,
+                                  ++$self->{ _session_counter } ) );
     return DECLINED;
 }
 
-sub hook_disconnect {
+sub hook_disconnect
+{
     my ($self) = @_;
 
-    if ($self->{reopen_} && $self->{_f}) {
-        $self->{_f} = undef;
+    if ( $self->{ reopen_ } && $self->{ _f } )
+    {
+        $self->{ _f } = undef;
     }
     return DECLINED;
 }
 
-sub hook_logging {
-    my ($self, $transaction, $trace, $hook, $plugin, @log) = @_;
+sub hook_logging
+{
+    my ( $self, $transaction, $trace, $hook, $plugin, @log ) = @_;
 
-    return DECLINED if !defined $self->{_loglevel} or
-                       $trace > $self->{_loglevel};
+    return DECLINED
+      if !defined $self->{ _loglevel } or
+          $trace > $self->{ _loglevel };
     return DECLINED if defined $plugin and $plugin eq $self->plugin_name;
 
     # Possibly reopen the log iff:
@@ -264,19 +293,21 @@ sub hook_logging {
     # - We're allowed to split sessions across logfiles
     # - We haven't logged anything yet this session
     # - We aren't in a session
-    if (!$self->{_f} ||
-        !$self->{_nosplit} ||
-        !$transaction ||
-        !$transaction->notes('file-logged-this-session')) {
-        unless (defined $self->maybe_reopen($transaction)) {
+    if ( !$self->{ _f } ||
+         !$self->{ _nosplit } ||
+         !$transaction ||
+         !$transaction->notes('file-logged-this-session') )
+    {
+        unless ( defined $self->maybe_reopen($transaction) )
+        {
             return DECLINED;
         }
-        $transaction->notes('file-logged-this-session', 1) if $transaction;
+        $transaction->notes( 'file-logged-this-session', 1 ) if $transaction;
     }
 
-    my $f = $self->{_f};
-    print $f strftime($self->{_tsformat}, localtime), ' ',
-             hostname(), '[', $$, ']: ', @log, "\n";
+    my $f = $self->{ _f };
+    print $f strftime( $self->{ _tsformat }, localtime ), ' ',
+      hostname(), '[', $$, ']: ', @log, "\n";
     return DECLINED;
 }
 

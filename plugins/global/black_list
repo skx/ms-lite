@@ -47,6 +47,7 @@ sub hook_data_post
     if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" ) ||
          ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) )
     {
+
         #
         #  Reject.
         #
@@ -61,17 +62,18 @@ sub hook_data_post
     # Get the sender address, stripping brackets if present
     #
     my $sender = $transaction->notes("MAIL-FROM") || "<>";
-    $sender    = lc($sender);
-    $sender    =~ s/^<//g;
-    $sender    =~ s/>$//g;
+    $sender = lc($sender);
+    $sender =~ s/^<//g;
+    $sender =~ s/>$//g;
 
     #
     #  Is the sender blacklisted?
     #
     if ( length($sender) &&
          ( ( -e "/srv/$domain/blacklisted/senders/$sender" ) ||
-           ( -e "/srv/_global_/blacklisted/senders/$sender" ) ) )
+            ( -e "/srv/_global_/blacklisted/senders/$sender" ) ) )
     {
+
         #
         #  OK this was from a blacklisted sender; reject.
         #

@@ -81,7 +81,7 @@ sub hook_data_post
     #
     if ( length($sender) &&
          ( ( -e "/srv/$domain/whitelisted/senders/$sender" ) ||
-           ( -e "/srv/_global_/whitelisted/senders/$sender" ) ) )
+            ( -e "/srv/_global_/whitelisted/senders/$sender" ) ) )
     {
 
         #
