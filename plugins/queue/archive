@@ -42,8 +42,8 @@ my $_counter = 0;
 
 =begin doc
 
-  Process our arguments - we expect a single directory to be passed to
- us which is the prefix for our archiving purpose.
+Process our arguments - we expect a single directory to be passed to
+us which is the prefix for our archive.
 
 =end doc
 
@@ -73,7 +73,7 @@ sub register
 
 =begin doc
 
-  If this mail is to be rejected then archive it to disk.
+If this mail is to be rejected then archive it to disk.
 
 =end doc
 
@@ -181,8 +181,10 @@ sub hook_queue
         #
         #  Get data to be included in the index
         #
-        my $from = $transaction->notes("MAIL-FROM")     || "<>";
-        my $subj = $transaction->header->get("Subject") || "";
+        my $from   = $transaction->notes("MAIL-FROM") || "<>";
+        my $ip     = $self->qp->connection->remote_ip;
+        my $reason = $transaction->notes("reason") || "Unknown reason";
+        my $subj   = $transaction->header->get("Subject") || "";
         chomp($subj);
 
         #
@@ -191,7 +193,8 @@ sub hook_queue
         open( DAT, ">>", "$dir/index" );
         flock( DAT, LOCK_EX );
         $subj =~ s/[\r\n]//g;
-        print DAT "$from\|$to\|$dir/new/$file\|$subj\n";
+        print DAT
+          "To:$to\tFrom:$from\tIP:$ip\tSubject:$subj\tReason:\t$reason\n";
         close(DAT);
 
         #
