@@ -6,25 +6,34 @@ Dependencies
 Mail Handling
 -------------
 
-  To recieve mail you'll need qpsmtpd, which will be configured to
- run the plugins located beneath ./plugins/
+To recieve mail you'll need qpsmtpd, which will be configured to
+run the plugins located beneath ./plugins/
 
-  Some of the plugins have additional dependencies they are listed
- here:
+Some of the plugins have additional dependencies they are listed
+here:
 
   apt-get install libsys-cpuload-perl
+
+
+
+IPv6 Support
+------------
+
+If you wish to run QPSMTPD with IPv6 support you'll also need:
+
+  apt-get install  libsocket6-perl  libio-socket-inet6-perl
 
 
 
 Quarantine Display
 ------------------
 
-  To view the quarantine of rejected mail for a domain you'll need to
- have Apache2 installed, and copy the single script in ./cgi-bin/ to
- /usr/lib/cgi-bin.
+To view the quarantine of rejected mail for a domain you'll need to
+have Apache2 installed, and copy the single script in ./cgi-bin/ to
+/usr/lib/cgi-bin.
 
-  Don't forget to ACL this script as it will allow others to view your
- mail instead...
+Don't forget to ACL this script as it will allow others to view your
+rejected email(s) too.
 
 
 
