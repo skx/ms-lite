@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Block mail from clients without RDNS.
+# Block mail from clients without RDNS - for IPv4 clients.
 #
 #
 
@@ -41,6 +41,7 @@ sub hook_data_post
     #
     if (
          !( ( -e "/srv/$domain/checks/rdns" ) ||
+            ( -e "/srv/$domain/checks/rdns4" ) ||
             ( -e "/srv/$domain/checks/all" ) ) )
     {
         $self->log( LOGWARN,
@@ -51,6 +52,12 @@ sub hook_data_post
 
     my $ip   = $self->qp->connection->remote_ip;
     my $host = $self->qp->connection->remote_host;
+
+    #
+    #  If this is an IPv6 host we'll skip it.
+    #
+    return DECLINED if ( $ip =~ /:/ );
+
 
     if ( ( $ip eq $host ) ||
          ( $host =~ /^unknown$/i ) )

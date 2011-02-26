@@ -133,11 +133,16 @@ checks/helo
 
 ##
 #
-# Test the connecting client has reverse DNS setup.
+# Test the connecting client has reverse DNS setup.  There are two
+# choices here to allow RDNS to be tested for either IPv4 or IPv6
+# independantly.
 #
-# This plugin is enabled if either of the following files are present:
+# This plugin is enabled if any of the following files are present:
 #
-#   /srv/example.com/checks/rdns
+#   /srv/example.com/checks/rdns4   - IPv4 checks only
+#   /srv/example.com/checks/rdns6   - IPv6 checks only
+#
+#   /srv/example.com/checks/rdns    - IPv4 & IPv6 checks
 #   /srv/example.com/checks/all
 #
 # This allows the plugin to be enabled or disabled on a per-domain basis.
@@ -145,7 +150,8 @@ checks/helo
 #
 ###
 
-checks/rdns
+checks/rdns4
+checks/rdns6
 
 
 
