@@ -24,9 +24,9 @@ Assumptions
 
   This system makes several assumptions:
 
-    1. The each mail will read in its entirity and either delivered to
+    1. The each mail will read in its entirety and either delivered to
        exim4 running upon the local host, or archived to a rejection location.
-       This means mails be received in their entirity, even if we know very
+       This means mails be received in their entirety, even if we know very
        early on that they are spam.
 
     2. That the configuration for domains is located beneath a common
@@ -44,7 +44,7 @@ Layout
   [This step completely ignores the configuration of exim4]
 
   The domains hosted upon the local machine will be configured beneath
- the directory /srv.  For each domain there will be a subdirectory named
+ the directory /srv.  For each domain there will be a sub-directory named
  after the domain.
 
   The archive of rejected mails will be stored at /spam/
@@ -75,7 +75,7 @@ Domain Users Configuration
     mkdir -p "/srv/example.com/users/valid"
     touch    "/srv/example.com/users/valid/*"
 
-  (ie. "/valid/*" is present.)
+  (i.e. "/valid/*" is present.)
 
   A domain that accepts email for all users except "bob" and "fred" will
  have:
@@ -198,7 +198,7 @@ Quarantine Display
  in cgi-bin somewhere that your webserver can reach it.
 
   The quarantine script should be ACL'd so that only authorised users can
- access it - as accessing it succesfully will enable a remote user to
+ access it - as accessing it successfully will enable a remote user to
  read all your rejected mail.
 
   The quarantine facility is pretty basic.  You get three things:
