@@ -64,6 +64,19 @@ sub hook_data_post
     #  The IP that is connecting, and the reverse of that.
     #
     my $remote_ip = $self->qp->connection->remote_ip;
+
+    #
+    #  If this is IPv6 we cannot use the DNSBL.
+    #
+    if ( $remote_ip =~ /:/ )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": ignoring connection from IPv6 host: $remote_ip "
+                  );
+        return DECLINED;
+    }
+
     my $reversed_ip = join( ".", reverse( split( /\./, $remote_ip ) ) );
 
     #
