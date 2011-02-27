@@ -11,10 +11,10 @@ About
 
     1.  A collection of plugins for qpsmtpd.
 
-    2.  A standard configuration mechanism.
+    2.  A standard configuration mechanism, using directories beneath
+       /srv.
 
-    3.  A local quarantine of rejected messages, and a matching
-        CGI script to allow this to be viewed remotely.
+    3.  A local quarantine of rejected messages, beneath /spam.
 
 
 
@@ -187,37 +187,6 @@ Spam Storage
  filename in this index is used for the quarantine display:
 
       /spam/212/example.com/index
-
-
-
-
-Quarantine Display
-------------------
-
-  To allow the quarantine to be displayed you will need to copy the file
- in cgi-bin somewhere that your webserver can reach it.
-
-  The quarantine script should be ACL'd so that only authorised users can
- access it - as accessing it successfully will enable a remote user to
- read all your rejected mail.
-
-  The quarantine facility is pretty basic.  You get three things:
-
-  1.  A list of all domains on the box.
-
-  2.  A list of all rejected mail for a given domain.
-
-  3.  The ability to download/view a single message.
-
-
-  Note that specifically you may not :
-
-  * Forward a quarantined mail.
-
-  * Auto-whitelist the mail's sender.
-
-  The former could be fixed, the latter would require enabling the Apache
- user to write to /srv which would be a security risk.
 
 
 
