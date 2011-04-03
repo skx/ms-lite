@@ -2,12 +2,11 @@
 #
 #  See if the mail is addressed to a valid user.
 #
-#  Do this by examining /srv/$domain/users/{valid invalid}
+#  Do this by examining /srv/$domain/users/{valid invalid}/
 #
 #  An invalid user will have two notes set:
 #
 #    reject  -> 1
-#
 #    reason  -> "Mail for $localpart not accepted at $domain"
 #
 #
@@ -24,8 +23,8 @@ use Qpsmtpd::Constants;
 
 =begin doc
 
-  This hook is called at "MAIL FROM" time, we record the sender but
- take no further action.
+This hook is called at "MAIL FROM" time, we record the sender but
+take no further action.
 
 =end doc
 
@@ -52,13 +51,14 @@ sub hook_mail
 
 =begin doc
 
-  This hook is called at "RCPT TO" time, and will attempt to ensure
- the recipient is valid.
+This hook is called at "RCPT TO" time, and will attempt to ensure
+the recipient is valid.
 
-  Regardless of whether the recipient is valid we'll return OK to
- allow the SMTP transaction to proceed.
+Regardless of whether the recipient is valid we'll return OK to
+allow the SMTP transaction to proceed.
 
-  For an invalid user we'll set the "reject" note to 1.
+For an invalid user we'll set the "reject" note to 1, and set a suitable
+reason.
 
 =end doc
 
@@ -88,14 +88,14 @@ sub hook_rcpt
     #
     #  Record the recipient, and the components.
     #
-    $transaction->notes( "RCPT-TO", "<$user\@$host>" );
-    $transaction->notes( "DOMAIN",  $host );
-    $transaction->notes( "LOCALPART",  $user );
+    $transaction->notes( "RCPT-TO",   "<$user\@$host>" );
+    $transaction->notes( "DOMAIN",    $host );
+    $transaction->notes( "LOCALPART", $user );
 
 
     #
     #  If the domain doesn't have a directory beneath /srv/ then it
-    # is a relay attempt
+    # is a relay attempt which we must deny.
     #
     if ( !-d "/srv/$host" )
     {
@@ -112,7 +112,7 @@ sub hook_rcpt
 
 
     #
-    #  Is the mail rejected?
+    #  Is the local recipient explictly denied?
     #
     if ( -e "/srv/$host/users/invalid/$user" )
     {
@@ -123,39 +123,74 @@ sub hook_rcpt
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason", "Mail for $user not accepted at $host" );
         $transaction->notes( "blocker", $self->plugin_name() );
-
         return OK;
     }
 
+
     #
-    #  Is it OK ?
+    #  Is mail for this domain enabled on a wildcard basis?
     #
-    if ( ( -e "/srv/$host/users/valid/*" ) ||
-         ( -e "/srv/$host/users/valid/$user" ) )
+    return OK if ( -e "/srv/$host/users/valid/*" );
+
+
+    #
+    #  Now we're reaching a conditional point.
+    #
+    #  If there is a per-localpart entry for this user then we're
+    # OK, unless it is a directory - in which case we're only OK
+    # if the sending IP sent it.
+    #
+    if ( -e "/srv/$host/users/valid/$user" )
     {
 
         #
-        #  Either wildcard or explicitly allowed
+        #  OK the user exists.  Is there an ACL in place?
         #
-        return OK;
-    }
-    else
-    {
+        if ( -d "/srv/$host/users/valid/$user/" )
+        {
 
-        #
-        #  Not permitted so it is denied.
-        #
-        $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail for $user not accepted at $host" );
-        $transaction->notes( "blocker", $self->plugin_name() );
+            #
+            #  OK ACL in place.  Test the sending IP
+            #
+            my $remote = $self->qp->connection->remote_ip;
 
-        #
-        #  Return OK, even though we'll drop the mail, because otherwise
-        # we'll get an error from qpsmtpd "No plugin decided whether
-        # relaying was allowed".
-        #
-        return OK;
+            if ( -e "/srv/$host/users/valid/$user/$remote" )
+            {
+                return OK;
+            }
+            else
+            {
+                $transaction->notes( "reject", 1 );
+                $transaction->notes( "reason",
+                                   "Mail for $user not accepted from $remote" );
+                $transaction->notes( "blocker", $self->plugin_name() );
+                return OK;
+            }
+        }
+        else
+        {
+
+            #
+            #  Explicitly allowed, with no ACL
+            #
+            return OK;
+        }
     }
+
+    #
+    #  At this point the mail hasn't been accepted, so it must
+    # be denied.
+    #
+    $transaction->notes( "reject",  1 );
+    $transaction->notes( "reason",  "Mail for $user not accepted at $host" );
+    $transaction->notes( "blocker", $self->plugin_name() );
+
+    #
+    #  Return OK, even though we'll drop the mail, because otherwise
+    # we'll get an error from qpsmtpd "No plugin decided whether
+    # relaying was allowed".
+    #
+    return OK;
 }
 
 
