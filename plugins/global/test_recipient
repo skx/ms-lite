@@ -89,7 +89,7 @@ sub hook_rcpt
     #  Record the recipient + domain.
     #
     $transaction->notes( "RCPT-TO", "<$user\@$host>" );
-    $transaction->notes( "domain",  $host );
+    $transaction->notes( "DOMAIN",  $host );
 
 
     #
