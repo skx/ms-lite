@@ -86,10 +86,11 @@ sub hook_rcpt
     my $user = lc $recipient->user;
 
     #
-    #  Record the recipient + domain.
+    #  Record the recipient, and the components.
     #
     $transaction->notes( "RCPT-TO", "<$user\@$host>" );
     $transaction->notes( "DOMAIN",  $host );
+    $transaction->notes( "LOCALPART",  $user );
 
 
     #
