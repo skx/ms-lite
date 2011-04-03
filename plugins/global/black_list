@@ -83,11 +83,6 @@ sub hook_data_post
     }
 
     #
-    #  Finally we'll test to see if the user is restricted to
-    # a particular set of remote IP addresses.
-    #
-
-    #
     #  Not blacklisted.
     #
     return DECLINED;
