@@ -47,7 +47,7 @@ sub hook_data_post
     # Get the domain this mail is for - this domain is setup
     # in the 'test_recipient' plugin
     #
-    my $domain = $transaction->notes("domain") || undef;
+    my $domain = $transaction->notes("DOMAIN") || undef;
     return DECLINED unless ( defined($domain) );
 
     #
