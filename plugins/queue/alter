@@ -25,10 +25,15 @@ sub hook_data_post
     #
     # MAIL FROM / RCPT TO values
     #
-    my $from   = $transaction->notes("MAIL-FROM");
-    my $to     = $transaction->notes("RCPT-TO");
-    my $domain = $transaction->notes("DOMAIN" );
-    my $local  = $transaction->notes("LOCALPART" );
+    #  BUG:  Relaying clients won't have these set.
+    #        See ./global/test_recipient for the early return.
+    #
+    #  TODO: Fix this
+    #
+    my $from   = $transaction->notes("MAIL-FROM") || "";
+    my $to     = $transaction->notes("RCPT-TO")   || "";
+    my $domain = $transaction->notes("DOMAIN" )   || "";
+    my $local  = $transaction->notes("LOCALPART" )|| "";
 
     #
     # Store hosts.
