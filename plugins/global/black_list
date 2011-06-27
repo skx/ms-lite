@@ -30,9 +30,10 @@ sub hook_data_post
     my ( $self, $transaction ) = (@_);
 
     #
-    # Get the sending IP address.
+    # Get the sending IP address & hostname.
     #
-    my $remote_ip = $self->qp->connection->remote_ip;
+    my $remote_ip   = $self->qp->connection->remote_ip;
+    my $remote_host = $self->qp->connection->remote_host;
 
     #
     # Get the domain this mail is for - this domain is setup
@@ -85,7 +86,7 @@ sub hook_data_post
     #
     #  Is the sending TLD blacklisted?
     #
-    my $tld = $sender;
+    my $tld = $remote_host;
     if ( $tld =~ /^(.*)\.([^.]+)$/ )
     {
         $tld = $2;
