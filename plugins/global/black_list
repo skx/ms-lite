@@ -83,6 +83,33 @@ sub hook_data_post
     }
 
     #
+    #  Is the sending TLD blacklisted?
+    #
+    my $tld = $sender;
+    if ( $tld =~ /^(.*)\.([^.]+)$/ )
+    {
+        $tld = $2;
+    }
+
+    #
+    #  If we did pull out a TLD then check to see if it blacklisted too.
+    #
+    if ( $tld !~ /\./ )
+    {
+        if ( ( -e "/srv/$domain/blacklisted/tld/$tld" ) ||
+             ( -e "/srv/_global_/blacklisted/tld/$tld" ) )
+        {
+            #
+            #  OK this was from a blacklisted TLD; reject
+            #
+            $transaction->notes( "reject", 1 );
+            $transaction->notes( "reason", "Blacklisted TLD." );
+            return DECLINED;
+        }
+    }
+
+
+    #
     #  Not blacklisted.
     #
     return DECLINED;
