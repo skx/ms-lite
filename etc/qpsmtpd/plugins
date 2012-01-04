@@ -151,7 +151,11 @@ checks/helo
 ###
 
 checks/rdns4
-checks/rdns6
+
+#
+#  Avoid RDNS for IPv6 for the moment.
+#
+# checks/rdns6
 
 
 
@@ -262,7 +266,7 @@ checks/dkim
 #
 ##
 
-checks/clamav
+# checks/clamav
 
 
 
