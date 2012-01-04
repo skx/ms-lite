@@ -45,8 +45,9 @@ sub hook_data_post
     #
     #  Is the IP blacklisted?
     #
-    if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" ) ||
-         ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) )
+    if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" )  ||
+         ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) ||
+         ( -e "/etc/blacklist.d/" . $remote_ip ) )
     {
 
         #
@@ -68,6 +69,16 @@ sub hook_data_post
     $sender =~ s/>$//g;
 
     #
+    # Domain of sender
+    #
+    my $sDomain = undef;
+    if ( $sender =~ /^(.*)@(.*)$/ )
+    {
+        $sDomain = $2;
+    }
+
+
+    #
     #  Is the sender blacklisted?
     #
     if ( length($sender) &&
@@ -79,9 +90,25 @@ sub hook_data_post
         #  OK this was from a blacklisted sender; reject.
         #
         $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail not accepted for delivery." );
+        $transaction->notes( "reason", "Mail not accepted for delivery - Disk too full - Sender: $sender" );
         return DECLINED;
     }
+
+    #
+    #  Is the sender's whole domain blacklisted?
+    #
+    if ( defined($sDomain) &&
+         ( ( -e "/srv/$domain/blacklisted/domains/$sDomain" ) ||
+            ( -e "/srv/_global_/blacklisted/domains/$sDomain" ) ) )
+    {
+        #
+        #  OK this was from a blacklisted domain; reject
+        #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason", "Mail not accepted for delivery - Disk too full - Domain $sDomain" );
+        return DECLINED;
+    }
+
 
     #
     #  Is the sending TLD blacklisted?
