@@ -67,18 +67,22 @@ sub hook_data_post
     #  Remove control characters & lower-case
     #
     $subject = lc($subject);
-    $subject =~ s/[\r\n\t]//g;
+    $subject =~ s/[\r\n\t]/ /g;
+    $subject =~ s/\s+/ /g;
+
+    $subject = "[empty]" if ( !defined($subject) );
 
     #
     # Now test to see if it is an approval post
     #
-    if ( $subject =~ / post from ([^ ]+) requires approval/ )
+    if ( ( $subject =~ / post from ([^ ]+) requires approval/ ) ||
+         ( ( $subject =~ /moderator request\(s\) waiting/ ) && ( $subject =~ /logcheck/i ) ) )
     {
         $self->log( LOGWARN, "mailman matched on subject $subject" );
 
         $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
-        $transaction->notes( "reason",  "Mailman posts not accepted here" );
+        $transaction->notes( "reason",  "mailman posts not accepted here" );
         return DECLINED;
     }
 
@@ -87,7 +91,7 @@ sub hook_data_post
     #  Terminate.
     #
     $self->log( LOGWARN,
-         $self->plugin_name() . ": plugin passed - mail will not be rejected" );
+         $self->plugin_name() . ": plugin passed subject:$subject - mail will not be rejected" );
 
     return DECLINED;
 }
