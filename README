@@ -203,7 +203,7 @@ Spam Storage
       /spam/212/example.com/{ new cur tmp }
 
   There will be an index created of the sender, recipient, subject, and
- filename in this index is used for the quarantine display:
+ filename the SPAM message was ultimately archived within.
 
       /spam/212/example.com/index
 
