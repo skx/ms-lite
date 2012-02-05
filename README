@@ -26,8 +26,10 @@ Assumptions
 
     1. The each mail will read in its entirety and either delivered to
        exim4 running upon the local host, or archived to a rejection location.
-       This means mails be received in their entirety, even if we know very
-       early on that they are spam.
+
+       This means incoming mails will always be read in their entirety, even
+       if we know very early on that they are spam.  (Without reading them
+       we can't store a copy prior to sending the SMTP-time rejection.)
 
     2. That the configuration for domains is located beneath a common
        prefix.  ("/srv/")
@@ -160,13 +162,30 @@ Domain Blacklist Configuration
  directories:
 
    /srv/example.com/blacklisted/ips/
+   /srv/example.com/blacklisted/tld/
+   /srv/example.com/blacklisted/senders/
+   /srv/example.com/blacklisted/domains/
 
-  To reject mail from the given IP just run:
+  For example to reject mail from a particular IP just run:
 
      mkdir -p /srv/example.com/blacklisted/ips/
      touch    /srv/example.com/blacklisted/ips/1.2.3.4
 
+  Similarly you could reject all mail from @aol.com by running:
 
+     mkdir -p /srv/example.com/blacklisted/domains/
+     touch    /srv/example.com/blacklisted/domains/aol.com
+
+  The only blacklisting method which require explaination is the
+ blacklisting by TLD.  If you blacklist the TLD ".ph" you are NOT
+ actually refusing mail from "foo@bar.ph", or "foo@bar.baz.ph", instead
+ you are rejecting incoming connections from hosts which have the
+ reverse DNS matching .ph.  If you receive an SMTP connection
+ from:
+    
+    1.2.3.4  -> RDNS == foo.dsl1-2-3.4.co.ph
+
+  Then the connection will default to being spam.
 
 
 Spam Storage
