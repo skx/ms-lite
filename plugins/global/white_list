@@ -93,6 +93,25 @@ sub hook_data_post
     }
 
 
+
+    my $sDomain = undef;
+    if ( $sender =~ /^(.*)@(.*)$/ )
+    {
+        $sDomain = $2;
+    }
+
+    if ( defined($sDomain) &&
+         ( ( -e "/srv/$domain/whitelisted/domains/$sDomain" ) ||
+            ( -e "/srv/_global_/whitelisted/domains/$sDomain" ) ) )
+    {
+        #
+        #  OK this was from a whitelisted sender, remove the note.
+        #
+        $transaction->notes( "reject", 0 );
+        $transaction->notes( "reason", 0 );
+        return DECLINED;
+    }
+
     #
     #  Are any of the recipients whitelisted?
     #
