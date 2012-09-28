@@ -61,6 +61,26 @@ sub hook_data_post
     }
 
     #
+    # Is the host blacklisted?  Useful for companies which have
+    # static reverse DNS setup for customers. e.g
+    #
+    #   X-REMOTE-IP: 85.17.165.245
+    #   X-REMOTE-HOST: hosted-by.leaseweb.com
+    #
+    if ( ( -e "/srv/$domain/blacklisted/hosts/$remote_host" )  ||
+         ( -e "/srv/_global_/blacklisted/hosts/$remote_host" ) )
+    {
+
+        #
+        #  Reject.
+        #
+        $transaction->notes( "reject", 1 );
+        $transaction->notes( "reason",
+                             "Hostname $remote_host locally blacklisted" );
+        return DECLINED;
+    }
+
+    #
     # Get the sender address, stripping brackets if present
     #
     my $sender = $transaction->notes("MAIL-FROM") || "<>";
