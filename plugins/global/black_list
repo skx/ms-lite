@@ -33,7 +33,10 @@ sub hook_data_post
     # Get the sending IP address & hostname.
     #
     my $remote_ip   = $self->qp->connection->remote_ip;
+    $remote_ip      = lc($remote_ip) if ( $remote_ip );
+
     my $remote_host = $self->qp->connection->remote_host;
+    $remote_host    = lc($remote_host) if ( $remote_host );
 
     #
     # Get the domain this mail is for - this domain is setup
@@ -110,7 +113,7 @@ sub hook_data_post
         #  OK this was from a blacklisted sender; reject.
         #
         $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail not accepted for delivery - Disk too full - Sender: $sender" );
+        $transaction->notes( "reason", "Mail not accepted for delivery blacklisted sender - $sender" );
         return DECLINED;
     }
 
