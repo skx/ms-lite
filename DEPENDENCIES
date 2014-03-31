@@ -6,13 +6,13 @@ Dependencies
 Mail Handling
 -------------
 
-To recieve mail you'll need qpsmtpd, which will be configured to
-run the plugins located beneath ./plugins/
+To recieve mail you'll need `qpsmtpd`, which will be configured to
+run the plugins located beneath `./plugins/`
 
 Some of the plugins have additional dependencies they are listed
 here:
 
-  apt-get install libsys-cpuload-perl
+     apt-get install libsys-cpuload-perl
 
 
 
