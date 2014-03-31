@@ -186,7 +186,6 @@ sub hook_queue
         my $ip     = $self->qp->connection->remote_ip;
         my $reason = $transaction->notes("reason") || "Unknown reason";
         my $subj   = $transaction->header->get("Subject") || "";
-        my $file   = $file;
         chomp($subj);
 
         #
@@ -198,6 +197,7 @@ sub hook_queue
         $h{ 'ip' }      = $ip;
         $h{ 'reason' }  = $reason;
         $h{ 'subject' } = $subj;
+        $h{ 'file' }    = $file;
 
         #
         #  Append to the index, using locking so we don't get fucked over.
