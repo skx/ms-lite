@@ -186,6 +186,7 @@ sub hook_queue
         my $ip     = $self->qp->connection->remote_ip;
         my $reason = $transaction->notes("reason") || "Unknown reason";
         my $subj   = $transaction->header->get("Subject") || "";
+        my $file   = $file;
         chomp($subj);
 
         #
@@ -217,10 +218,9 @@ sub hook_queue
 
 
     my $msg_id = $transaction->header->get('Message-Id') || '';
-    my $filey  = $transaction->notes("msgid")            || '';
-
     $msg_id =~ s/[\r\n].*//s;
-    return ( DECLINED, "archive_spam - $msg_id [$filey]" );
+
+    return ( DECLINED, "archive_spam - $msg_id" );
 
     #
     #  Proceed to queue/deliver where the bounce will be signalled.
