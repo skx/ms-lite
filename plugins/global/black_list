@@ -32,11 +32,11 @@ sub hook_data_post
     #
     # Get the sending IP address & hostname.
     #
-    my $remote_ip   = $self->qp->connection->remote_ip;
-    $remote_ip      = lc($remote_ip) if ( $remote_ip );
+    my $remote_ip = $self->qp->connection->remote_ip;
+    $remote_ip = lc($remote_ip) if ($remote_ip);
 
     my $remote_host = $self->qp->connection->remote_host;
-    $remote_host    = lc($remote_host) if ( $remote_host );
+    $remote_host = lc($remote_host) if ($remote_host);
 
     #
     # Get the domain this mail is for - this domain is setup
@@ -48,7 +48,7 @@ sub hook_data_post
     #
     #  Is the IP blacklisted?
     #
-    if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" )  ||
+    if ( ( -e "/srv/$domain/blacklisted/ips/$remote_ip" ) ||
          ( -e "/srv/_global_/blacklisted/ips/$remote_ip" ) ||
          ( -e "/etc/blacklist.d/" . $remote_ip ) )
     {
@@ -70,7 +70,7 @@ sub hook_data_post
     #   X-REMOTE-IP: 85.17.165.245
     #   X-REMOTE-HOST: hosted-by.leaseweb.com
     #
-    if ( ( -e "/srv/$domain/blacklisted/hosts/$remote_host" )  ||
+    if ( ( -e "/srv/$domain/blacklisted/hosts/$remote_host" ) ||
          ( -e "/srv/_global_/blacklisted/hosts/$remote_host" ) )
     {
 
@@ -113,7 +113,8 @@ sub hook_data_post
         #  OK this was from a blacklisted sender; reject.
         #
         $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail not accepted for delivery blacklisted sender - $sender" );
+        $transaction->notes( "reason",
+                "Mail not accepted for delivery blacklisted sender - $sender" );
         return DECLINED;
     }
 
@@ -124,11 +125,15 @@ sub hook_data_post
          ( ( -e "/srv/$domain/blacklisted/domains/$sDomain" ) ||
             ( -e "/srv/_global_/blacklisted/domains/$sDomain" ) ) )
     {
+
         #
         #  OK this was from a blacklisted domain; reject
         #
         $transaction->notes( "reject", 1 );
-        $transaction->notes( "reason", "Mail not accepted for delivery - Disk too full - Domain $sDomain" );
+        $transaction->notes(
+              "reason",
+              "Mail not accepted for delivery - Disk too full - Domain $sDomain"
+        );
         return DECLINED;
     }
 
@@ -147,12 +152,14 @@ sub hook_data_post
     #
     if ( $tld !~ /\./ )
     {
+
         #
         #  Global or per-domain rejection.
         #
         if ( ( -e "/srv/$domain/blacklisted/tld/$tld" ) ||
              ( -e "/srv/_global_/blacklisted/tld/$tld" ) )
         {
+
             #
             #  OK this was from a blacklisted TLD; reject
             #

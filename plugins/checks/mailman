@@ -76,7 +76,8 @@ sub hook_data_post
     # Now test to see if it is an approval post
     #
     if ( ( $subject =~ / post from ([^ ]+) requires approval/ ) ||
-         ( ( $subject =~ /moderator request\(s\) waiting/ ) && ( $subject =~ /logcheck/i ) ) )
+         ( ( $subject =~ /moderator request\(s\) waiting/ ) &&
+            ( $subject =~ /logcheck/i ) ) )
     {
         $self->log( LOGWARN, "mailman matched on subject $subject" );
 
@@ -91,7 +92,9 @@ sub hook_data_post
     #  Terminate.
     #
     $self->log( LOGWARN,
-         $self->plugin_name() . ": plugin passed subject:$subject - mail will not be rejected" );
+                $self->plugin_name() .
+                  ": plugin passed subject:$subject - mail will not be rejected"
+              );
 
     return DECLINED;
 }

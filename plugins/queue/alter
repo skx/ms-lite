@@ -32,8 +32,8 @@ sub hook_data_post
     #
     my $from   = $transaction->notes("MAIL-FROM") || "";
     my $to     = $transaction->notes("RCPT-TO")   || "";
-    my $domain = $transaction->notes("DOMAIN" )   || "";
-    my $local  = $transaction->notes("LOCALPART" )|| "";
+    my $domain = $transaction->notes("DOMAIN")    || "";
+    my $local  = $transaction->notes("LOCALPART") || "";
 
     #
     # Store hosts.
@@ -47,7 +47,7 @@ sub hook_data_post
     #
     $transaction->header->add( 'X-MAIL-FROM', $from );
     $transaction->header->add( 'X-RCPT-TO',   $to );
-    $transaction->header->add( 'X-DOMAIN', $domain );
+    $transaction->header->add( 'X-DOMAIN',    $domain );
     $transaction->header->add( 'X-LOCALPART', $local );
 
     #

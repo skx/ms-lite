@@ -104,6 +104,7 @@ sub hook_data_post
          ( ( -e "/srv/$domain/whitelisted/domains/$sDomain" ) ||
             ( -e "/srv/_global_/whitelisted/domains/$sDomain" ) ) )
     {
+
         #
         #  OK this was from a whitelisted sender, remove the note.
         #
