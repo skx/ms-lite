@@ -25,10 +25,11 @@
 
 use Qpsmtpd::Constants;
 
+use Fcntl qw(:flock);
 use File::Path qw(mkpath);
+use JSON;
 use Sys::Hostname qw(hostname);
 use Time::HiRes qw(gettimeofday);
-use Fcntl qw(:flock);
 
 use strict;
 use warnings;
@@ -188,13 +189,22 @@ sub hook_queue
         chomp($subj);
 
         #
+        #  We'll write that out as a JSON hash.
+        #
+        my %h;
+        $h{ 'to' }      = $to;
+        $h{ 'from' }    = $from;
+        $h{ 'ip' }      = $ip;
+        $h{ 'reason' }  = $reason;
+        $h{ 'subject' } = $subj;
+
+        #
         #  Append to the index, using locking so we don't get fucked over.
         #
         open( DAT, ">>", "$dir/index" );
         flock( DAT, LOCK_EX );
         $subj =~ s/[\r\n]//g;
-        print DAT
-          "To:$to\tFrom:$from\tIP:$ip\tSubject:$subj\tReason:\t$reason\n";
+        print DAT encode_json( \%h ) . "\n";
         close(DAT);
 
         #
