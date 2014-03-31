@@ -192,7 +192,7 @@ sub hook_queue
         #  We'll write that out as a JSON hash.
         #
         my %h;
-        $h{ 'to' }      = $to;
+        $h{ 'to' }      = $recipient;
         $h{ 'from' }    = $from;
         $h{ 'ip' }      = $ip;
         $h{ 'reason' }  = $reason;
