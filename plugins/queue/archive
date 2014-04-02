@@ -25,10 +25,11 @@
 
 use Qpsmtpd::Constants;
 
+use Fcntl qw(:flock);
 use File::Path qw(mkpath);
+use JSON;
 use Sys::Hostname qw(hostname);
 use Time::HiRes qw(gettimeofday);
-use Fcntl qw(:flock);
 
 use strict;
 use warnings;
@@ -181,36 +182,50 @@ sub hook_queue
         #
         #  Get data to be included in the index
         #
-        my $from   = $transaction->notes("MAIL-FROM") || "<>";
-        my $ip     = $self->qp->connection->remote_ip;
-        my $reason = $transaction->notes("reason") || "Unknown reason";
-        my $subj   = $transaction->header->get("Subject") || "";
-        chomp($subj);
+        my %h;
+        $h{ 'from' }      = $transaction->notes("MAIL-FROM") . " ";
+        $h{ 'ip' }        = $self->qp->connection->remote_ip;
+        $h{ 'host' }      = $self->qp->connection->remote_host;
+        $h{ 'helo' }      = $self->qp->connection->hello_host;
+        $h{ 'reason' }    = $transaction->notes("reason") || "Unknown reason";
+        $h{ 'subject' }   = $transaction->header->get("Subject") || "";
+        $h{ 'recipient' } = $to;
+        $h{ 'filename' }  = $file;
+
+        #
+        #  Optional message-ID.
+        #
+        #  These should be present, but often aren't.
+        #
+        my $msg = $transaction->header->get('Message-Id') || '';
+        $h{ 'message-id' } = $msg if ( $msg && length($msg) );
+
+        # strip newlines
+        foreach my $x ( keys %h )
+        {
+
+            # remove newlines
+            $h{ $x } =~ s/[\r\n]//g;
+
+            # remove leading/trailing space
+            $h{ $x } =~ s/^\s+|\s+$//g;
+        }
 
         #
         #  Append to the index, using locking so we don't get fucked over.
         #
-        open( DAT, ">>", "$dir/index" );
+        open( DAT, ">>", "$dir/index.json" );
         flock( DAT, LOCK_EX );
-        $subj =~ s/[\r\n]//g;
-        print DAT
-          "To:$to\tFrom:$from\tIP:$ip\tSubject:$subj\tReason:\t$reason\n";
-        close(DAT);
 
-        #
-        #  Save the filename away as a reference.
-        #
-        #  TODO: Mail-scanning.com used this, do we?
-        #
-        $transaction->notes( "msgid", $file );
+        my $j = JSON->new->allow_blessed;
+        print DAT $j->encode( \%h ) . "\n";
+        close(DAT);
     }
 
 
     my $msg_id = $transaction->header->get('Message-Id') || '';
-    my $filey  = $transaction->notes("msgid")            || '';
-
     $msg_id =~ s/[\r\n].*//s;
-    return ( DECLINED, "archive_spam - $msg_id [$filey]" );
+    return ( DECLINED, "archive_spam - $msg_id" );
 
     #
     #  Proceed to queue/deliver where the bounce will be signalled.
