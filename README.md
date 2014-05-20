@@ -1,5 +1,4 @@
 
-
 About
 -----
 
@@ -7,15 +6,23 @@ About
 This repository contains the files necessary for a mail-scanning-lite
 service to run upon a single host.
 
+mail-scanning-lite is basically a cut down version of the (defunct) [commercial mail-scanning](http://book.mail-scanning.com/) service, and you can read all about its implementation, goal, and setup in the previous link.
+
 This system comprises of three distinct parts:
 
-* A collection of plugins for qpsmtpd.
+
+* A collection of plugins for `qpsmtpd`.
 
 * A standard configuration mechanism, using directories beneath `/srv`.
 
 * A local quarantine of rejected messages, beneath `/spam`.
 
+In short this setup allows you to handle mail for an arbitrary number of virtual domains.  Incoming mail will be tested for spam at SMTP-time, with one of two results;
 
+* The mail is successfully delivered.
+* The mail is rejected at SMTP-time and __also__ archived to the local filesystem.
+    * Which allows you to see mails that have been rejected in the case of error.
+    * Because SPAM is rejected at SMTP-time there are no issues with generating bounces to spoofed senders. 
 
 
 Assumptions
