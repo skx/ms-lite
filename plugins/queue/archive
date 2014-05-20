@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#  Here we archive the mail as it wa rejected for being spam.
+#  Here we archive the mail as it waw rejected for being spam.
 #
 #  We write our archive of rejected messages beneath /spam/ with a subdirectory
 # for every day, and then for the domain itself.
@@ -13,7 +13,7 @@
 #  To speedup the display of quarantined mail a simple index of each rejected
 # mail is also written to:
 #
-#    /spam/10/steve.org.uk/index
+#    /spam/10/steve.org.uk/index.json
 #
 #  (In the real mail-scanning.com service this data was stored in MySQL.)
 #
@@ -212,7 +212,7 @@ sub hook_queue
         }
 
         #
-        #  Append to the index, using locking so we don't get fucked over.
+        #  Append to the index, using locking to avoid corruption.
         #
         open( DAT, ">>", "$dir/index.json" );
         flock( DAT, LOCK_EX );
