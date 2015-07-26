@@ -93,8 +93,8 @@ sub hook_data_post
     #
     # Now split the result into a status-string and an explanation
     #
-    my $status   = $result->code;
-    my $explain  = $result->local_explanation;
+    my $status  = $result->code;
+    my $explain = $result->local_explanation;
 
     #
     # Log the results
