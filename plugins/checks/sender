@@ -60,6 +60,10 @@ sub hook_data_post
     $sender =~ s/^<|>$//g;
     $sender = lc($sender);
 
+    #
+    #  An empty envelope-sender is legitimate
+    #
+    return DECLINED unless( length( $sender ) );
 
     #
     # Reject if unqualified.
@@ -70,8 +74,7 @@ sub hook_data_post
 
         $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
-        $transaction->notes( "reason",  "Sender seems bogu: $senders" );
-        return DECLINED;
+        $transaction->notes( "reason",  "Sender seems bogus: $senders" );
     }
 
     return DECLINED;
