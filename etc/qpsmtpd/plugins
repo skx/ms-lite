@@ -266,7 +266,23 @@ checks/dkim_check
 
 
 
+
 ##
+#
+# Perform SPF-lookups against the senders of mail.
+#
+# NOTE: We don't reject mail for failures at this stage.
+#
+##
+
+checks/spf
+
+
+
+
+
+##
+#
 #
 # Look for virus-infected mails.
 #
