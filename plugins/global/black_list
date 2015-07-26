@@ -114,7 +114,7 @@ sub hook_data_post
         #
         $transaction->notes( "reject", 1 );
         $transaction->notes( "reason",
-                "Mail not accepted for delivery blacklisted sender - $sender" );
+                "Mail not accepted, sender $sender." );
         return DECLINED;
     }
 
@@ -132,7 +132,7 @@ sub hook_data_post
         $transaction->notes( "reject", 1 );
         $transaction->notes(
               "reason",
-              "Mail not accepted for delivery - Disk too full - Domain $sDomain"
+              "Mail not accepted, domain $sDomain."
         );
         return DECLINED;
     }
