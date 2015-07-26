@@ -71,6 +71,22 @@ global/unrecognized_commands
 
 
 
+
+##
+#  Sender checks
+#
+#  Right now we just insiste on a sender containing a period,
+# unless it is a bounce (which will have a sender of '<>').
+#
+##
+
+checks/sender
+
+
+
+
+
+
 ##
 #
 #  DNS Blacklists.
