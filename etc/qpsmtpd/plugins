@@ -150,7 +150,7 @@ checks/helo
 #
 ###
 
-checks/rdns4
+# checks/rdns4
 
 #
 #  Avoid RDNS for IPv6 for the moment.
@@ -246,6 +246,22 @@ checks/mailers
 ##
 
 checks/dkim
+
+
+
+
+
+##
+#
+# Create a note, and message-header, storing the result of a DKIM check.
+#
+# This allows DKIM failures to be detected via procmail, or similar.
+#
+# NOTE: We don't reject mail for failures at this stage.
+#
+##
+
+checks/dkim_check
 
 
 
