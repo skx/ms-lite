@@ -40,7 +40,7 @@ sub hook_data_post
     # If this check isn't enabled then return immediately
     #
     if (
-         !( ( -e "/srv/$domain/checks/rdns" ) ||
+         !( ( -e "/srv/$domain/checks/dkim" ) ||
             ( -e "/srv/$domain/checks/all" ) ) )
     {
         $self->log( LOGWARN,
