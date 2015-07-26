@@ -94,6 +94,11 @@ sub hook_data_post
     my $result = $policy->apply($dkim) || "NO-RESULT";
 
     #
+    # Make the result available to the future.
+    #
+    $transaction->notes( "dkim_result",  $result );
+
+    #
     #  Log it for the moment
     #
     my $from = $transaction->notes("MAIL-FROM");
