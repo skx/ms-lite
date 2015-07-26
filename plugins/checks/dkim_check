@@ -1,0 +1,111 @@
+#!/usr/bin/perl
+#
+# Attempt to verify the present of any DKIM signatures.
+#
+# At the moment we just log results.
+#
+
+use Qpsmtpd::Constants;
+use Mail::DKIM::Verifier;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("DOMAIN") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If this check isn't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/dkim" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    # Look for a signature header.
+    #
+    my $count = 0;
+    $count += $transaction->header->count('DKIM-Signature');
+    $count += $transaction->header->count('DomainKey-Signature');
+    return DECLINED unless ( $count gt 0 );
+
+    #
+    # Create the checking object.
+    #
+    my $dkim = new Mail::DKIM::Verifier;
+    return DECLINED unless ($dkim);
+
+    #
+    # Add the headers from the incoming mail.
+    #
+    $transaction->body_resetpos;
+    foreach my $line ( split( /\n/s, $transaction->header->as_string ) )
+    {
+        $line =~ s/\r?$/\015\012/s;
+        $dkim->PRINT($line);
+    }
+
+    #
+    # Add the body from the incoming mail.
+    #
+    $transaction->body_resetpos;
+    while ( my $line = $transaction->body_getline )
+    {
+        chomp($line);
+        $line =~ s/\015$//;
+        $dkim->PRINT( $line . "\x0D\x0A" );
+    }
+
+    # Close the mail.
+    $dkim->CLOSE;
+
+    #
+    # Get the policy and apply it to create a result
+    #
+    my $policy = $dkim->fetch_author_policy;
+    my $result = $policy->apply($dkim) || "NO-RESULT";
+
+    #
+    #  Log it for the moment
+    #
+    my $from = $transaction->notes("MAIL-FROM");
+    $self->log( LOGWARN, "DKIM: $from $result" );
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;
