@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+#
+# Ensure the sender address has at least one period in it.
+#
+# e.g. This is valid:  foo@example.com
+#
+#      This is bogus:  foo@bar
+#
+#
+
+
+use Qpsmtpd::Constants;
+
+
+sub hook_data_post
+{
+    my ( $self, $transaction ) = (@_);
+
+
+    #
+    # If the mail is rejected terminate quickly
+    #
+    if ( ( $transaction->notes("reject") || 0 ) == 1 )
+    {
+        $self->log( LOGWARN,
+                    $self->plugin_name() .
+                      ": terminating as mail is already rejected"
+                  );
+        return DECLINED;
+    }
+
+
+
+    #
+    # Get the domain this mail is for - this domain is setup
+    # in the 'test_recipient' plugin
+    #
+    my $domain = $transaction->notes("DOMAIN") || undef;
+    return DECLINED unless ( defined($domain) );
+
+
+
+    #
+    # If this check isn't enabled then return immediately
+    #
+    if (
+         !( ( -e "/srv/$domain/checks/sender" ) ||
+            ( -e "/srv/$domain/checks/all" ) ) )
+    {
+        $self->log( LOGWARN,
+                $self->plugin_name() . ": plugin disabled for domain $domain" );
+        return DECLINED;
+    }
+
+
+    #
+    # Get the sender
+    #
+    my $sender = $transaction->notes("MAIL-FROM") || "<>";
+    $sender =~ s/^<|>$//g;
+    $sender = lc($sender);
+
+
+    #
+    # Reject if unqualified.
+    #
+    if ( $sender !~ /\./ )
+    {
+        $self->log( LOGWARN, "Sender seems bogus: $sender" );
+
+        $transaction->notes( "reject",  1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
+        $transaction->notes( "reason",  "Sender seems bogu: $senders" );
+        return DECLINED;
+    }
+
+    return DECLINED;
+}
+
+
+
+
+#
+# End of plugin
+#
+1;
