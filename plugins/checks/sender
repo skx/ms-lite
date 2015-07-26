@@ -74,7 +74,7 @@ sub hook_data_post
 
         $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
-        $transaction->notes( "reason",  "Sender seems bogus: $senders" );
+        $transaction->notes( "reason",  "Sender seems bogus: $sender" );
     }
 
     return DECLINED;
