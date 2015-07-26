@@ -5,7 +5,7 @@
 
 
 use Qpsmtpd::Constants;
-
+use Mail::SPF;
 
 sub hook_data_post
 {
