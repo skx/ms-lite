@@ -271,7 +271,9 @@ checks/dkim_check
 #
 # Perform SPF-lookups against the senders of mail.
 #
-# NOTE: We don't reject mail for failures at this stage.
+# Hard-Failures will result in mail being rejected at SMTP-time, but
+# soft failures, missing records, or neutral results will result in
+# emails being accepted for delivery.
 #
 ##
 
