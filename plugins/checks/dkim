@@ -53,17 +53,20 @@ sub hook_data_post
     #
     #  Some domains that signe their messages with DKIM.
     #
-    my @dkim_domains = qw ! ebay paypal gmail googlemail !;
+    my @dkim_domains = qw ! amazon apple ebay paypal gmail googlemail yahoo bofa bankofamerica quickbooks itunes facebookemail twitter linkedin priceline groupon netflix !;
 
     #
-    #  Get the sender address, setup in the
+    #  Get the sender address, setup in the connection-phase
     #
     my $from = $transaction->notes("MAIL-FROM");
     $from =~ s/^<|>$//g;
     $from = lc($from);
 
-
-
+    #
+    # Look for the domains we know should be signed.
+    #
+    # TODO: Look at dmarc?
+    #
     foreach my $domain (@dkim_domains)
     {
 
@@ -86,7 +89,7 @@ sub hook_data_post
             #
             if ( !defined($dkim) )
             {
-                $self->log( LOGWARN, "dkim - no header from:$from" );
+                $self->log( LOGWARN, "DKIM - no header from:$from" );
 
                 $transaction->notes( "reject",  1 );
                 $transaction->notes( "blocker", $self->plugin_name() );
