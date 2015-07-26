@@ -89,7 +89,28 @@ sub hook_data_post
     # Get the SPF-result
     #
     my $result = $spf_server->process($request);
-    $self->log( LOGWARN, "SPF $from -> $result" );
+
+    #
+    # Now split the result into a status-string and an explanation
+    #
+    my $status   = $result->code;
+    my $explain  = $result->local_explanation;
+
+    #
+    # Log the results
+    #
+    $self->log( LOGWARN, "SPF: <$from> - $status - $explain" );
+
+    #
+    # We only reject a hard-fail
+    #
+    if ( $status =~ /^fail$/i )
+    {
+        $transaction->notes( "reject",  1 );
+        $transaction->notes( "blocker", $self->plugin_name() );
+        $transaction->notes( "reason",  "SPF FAIL: $status - $explain" );
+        return DECLINED;
+    }
 
     #
     # End of processing.
