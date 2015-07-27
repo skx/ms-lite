@@ -54,6 +54,14 @@ sub hook_data_post
     my $helo = $self->qp->connection->hello_host;
 
     #
+    # Does the helo-host match a whitelist of forwarders?
+    #
+    # TODO: Allow this to be configured in a config-file
+    #
+    return DECLINED if ( $helo /\.iki\.fi/i );
+
+
+    #
     # Get the remote IP from the connecting-host.
     #
     my $ip = $self->qp->connection->remote_ip;
