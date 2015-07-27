@@ -7,5 +7,3 @@ clean:
 tidy:
 	perltidy $$(find plugins/ -type f -print)
 
-test:
-	prove --shuffle t/
