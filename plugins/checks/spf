@@ -58,7 +58,7 @@ sub hook_data_post
     #
     # TODO: Allow this to be configured in a config-file
     #
-    return DECLINED if ( $helo =~ /\.iki\.fi/i );
+    return DECLINED if ( $helo =~ /\.iki\.fi$/i );
 
 
     #
