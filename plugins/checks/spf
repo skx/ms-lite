@@ -110,9 +110,9 @@ sub hook_data_post
     $self->log( LOGWARN, "SPF: <$from> - $status - $explain" );
 
     #
-    # We only reject a hard-fail
+    # We only reject a hard-fail, or a permanent error.
     #
-    if ( $status =~ /^fail$/i )
+    if ( $status =~ /^(permerror|fail)$/i )
     {
         $transaction->notes( "reject",  1 );
         $transaction->notes( "blocker", $self->plugin_name() );
