@@ -51,7 +51,9 @@ sub hook_data_post
 
 
     #
-    #  Some domains that signe their messages with DKIM.
+    #  These domains *always* sign with DKIM.
+    #
+    #  If the signature is missing that means their domains are being spoofed.
     #
     my @dkim_domains = qw ! amazon apple ebay paypal gmail googlemail yahoo bofa bankofamerica quickbooks itunes facebookemail twitter linkedin priceline groupon netflix !;
 
