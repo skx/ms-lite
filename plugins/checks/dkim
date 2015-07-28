@@ -55,7 +55,7 @@ sub hook_data_post
     #
     #  If the signature is missing that means their domains are being spoofed.
     #
-    my @dkim_domains = qw ! amazon apple ebay paypal gmail googlemail yahoo bofa bankofamerica quickbooks itunes facebookemail twitter linkedin priceline groupon netflix !;
+    my @dkim_domains = qw ! amazon apple bankofamerica bofa ebay facebookemail gmail googlemail groupon itunes linkedin netflix paypal priceline quickbooks twitter yahoo !;
 
     #
     #  Get the sender address, setup in the connection-phase
