@@ -63,7 +63,7 @@ sub hook_data_post
     #
     #  An empty envelope-sender is legitimate
     #
-    return DECLINED unless( length( $sender ) );
+    return DECLINED unless ( length($sender) );
 
     #
     # Reject if unqualified.

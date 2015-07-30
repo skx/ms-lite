@@ -96,7 +96,7 @@ sub hook_data_post
     #
     # Make the result available to the future.
     #
-    $transaction->notes( "dkim_result",  $result );
+    $transaction->notes( "dkim_result", $result );
 
     #
     #  Log it for the moment
